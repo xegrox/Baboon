@@ -1,0 +1,89 @@
+<template>
+  <Modal :show="show">
+    <div class="flex flex-col gap-y-4">
+      <h1 class="text-2xl font-black text-white">Connect with SFTP</h1>
+      <div/>
+      <TextInput ref="input_1" v-model.trim="sftp.host" placeholder="Hostname" :disabled="loading" @enter="focusRef('input_2')"/>
+      <TextInput ref="input_2" v-model.trim="sftp.port" placeholder="Port" type="number" :disabled="loading" @enter="focusRef('input_3')"/>
+      <TextInput ref="input_3" v-model.trim="sftp.username" placeholder="Username" :disabled="loading" @enter="focusRef('input_4')"/>
+      <TextInput ref="input_4" v-model="sftp.password" placeholder="Password" type="password" :disabled="loading" @enter="submit"/>
+      <div/>
+      <ProgressButton ref="submit" @click="post_sftp" :loading="loading" :disabled="!all_filled" indeterminate>
+        Connect
+      </ProgressButton>
+    </div>
+  </Modal>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+import Modal from '../ui/Modal.vue'
+import TextInput from '../ui/TextInput.vue'
+import ProgressButton from '../ui/ProgressButton.vue'
+import { AlertType } from '../../interfaces/AlertItem.interface'
+
+export default defineComponent({
+  components: {
+    Modal,
+    TextInput,
+    ProgressButton
+  },
+  props: {
+    show: Boolean
+  },
+  data() {
+    return {
+      sftp: {
+        host: '',
+        port: '',
+        username: '',
+        password: '',
+      },
+      loading: false
+    }
+  },
+  computed: {
+    all_filled(): Boolean {
+      if (this.sftp.host === '' || this.sftp.port === '' || this.sftp.username === '' || this.sftp.password === '') return false
+      return true
+    }
+  },
+  methods: {
+    focusRef(refName: string) {
+      (this.$refs[refName] as any).focus()
+    },
+    submit() {
+      ((this.$refs.submit as any).$el as HTMLElement).click()
+    },
+    post_sftp() {
+      this.loading = true
+      this.$sftp.connect({
+        host: this.sftp.host,
+        port: parseInt(this.sftp.port),
+        username: this.sftp.username,
+        password: this.sftp.password
+      }).exec({
+        onSuccess: () => {
+          this.loading = false
+          this.$emit('done')
+          this.$accessor.alerts.add({
+            type: AlertType.Success,
+            title: 'Connected via SFTP'
+          })
+        },
+        onError: (msg) => {
+          this.loading = false
+          this.$accessor.alerts.add({
+            type: AlertType.Error,
+            title: 'Failed to establish SFTP connection',
+            content: msg
+          })
+        }
+      })
+    }
+  }
+})
+</script>
+
+<style scoped>
+</style>
