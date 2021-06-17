@@ -7,10 +7,11 @@
         <Projects class="flex-none w-20"/>
         <Explorer class="w-80"/>
       </div>
-      <div class="flex-auto flex flex-col">
-        <Tabs class="flex-none h-12 w-full"/>
-        <Editor class="flex-1"></Editor>
-      </div>
+      <ProjectWrapper class="flex-auto">
+        <template v-slot="slotProps">
+          <Editor class="h-full" :project="slotProps.project"/>
+        </template>
+      </ProjectWrapper>
     </div>
     <AlertCenter/>
   </div>
@@ -20,12 +21,13 @@
 import { defineComponent } from 'vue'
 import Projects from '../components/layout/panes/projects/index.vue'
 import Explorer from '../components/layout/panes/explorer/index.vue'
-import Tabs from '../components/layout/panes/tabs/index.vue'
 import Editor from '../components/layout/panes/editor/index.vue'
+import ProjectWrapper from '../components/layout/panes/ProjectWrapper.vue'
 import Scrim from '../components/ui/Scrim.vue'
 import Setup from '../components/layout/Setup.vue'
 import AlertCenter from '../components/layout/AlertCenter.vue'
-import { AlertType } from '../interfaces/AlertItem.interface'
+import { AlertType } from '../types/AlertItem.interface'
+import { ProjectItem } from '../types/ProjectItem.class'
 import CodeMirror from 'codemirror'
 
 export default defineComponent({
@@ -33,8 +35,8 @@ export default defineComponent({
   components: {
     Projects,
     Explorer,
-    Tabs,
     Editor,
+    ProjectWrapper,
     Setup,
     Scrim,
     AlertCenter
@@ -42,7 +44,14 @@ export default defineComponent({
   data() {
     return {
       pinging: true,
-      connected: false
+      connected: false,
+      test: true
+    }
+  },
+  computed: {
+    activeProject(): ProjectItem {
+      var projectStore = this.$accessor.projects
+      return projectStore.all.get(projectStore.activePath)!
     }
   },
   beforeCreate() {
@@ -65,17 +74,23 @@ export default defineComponent({
     })
   },
   beforeMount() {
-    this.$accessor.tabs.add({
-      path: 'index.js',
-      doc: CodeMirror.Doc('index')
-    })
-    this.$accessor.tabs.add({
+    var proj = new ProjectItem('test')
+    proj.addTab({
       path: 'babeler.js',
       doc: CodeMirror.Doc('babeler')
     })
+    proj.addTab({
+      path: 'index.js',
+      doc: CodeMirror.Doc('index')
+    })
+    var proj2 = new ProjectItem('another')
+    proj2.addTab({
+      path: 'another.js',
+      doc: CodeMirror.Doc('another')
+    })
+    this.$accessor.projects.add(proj)
+    this.$accessor.projects.add(proj2)
+    this.$accessor.projects.updateActive('another')
   }
 })
 </script>
-
-<css scoped>
-</css>

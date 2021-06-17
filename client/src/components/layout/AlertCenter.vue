@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { AlertItem } from '../../interfaces/AlertItem.interface'
+import { AlertItem } from '../../types/AlertItem.interface'
 import Alert from '../ui/Alert.vue'
 
 export default defineComponent({

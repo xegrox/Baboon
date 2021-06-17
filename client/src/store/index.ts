@@ -1,12 +1,12 @@
 import { createStore } from 'vuex'
 import { useAccessor } from 'typed-vuex'
 import Alerts from './modules/alerts'
-import Tabs from './modules/tabs'
+import Projects from './modules/projects'
 
 const storePattern = {
   modules: {
     alerts: Alerts,
-    tabs: Tabs,
+    projects: Projects,
   }
 }
 

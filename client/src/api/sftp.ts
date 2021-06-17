@@ -1,7 +1,7 @@
 import { App } from 'vue'
 import Axios, { AxiosResponse, AxiosError } from 'axios'
 import { accessor } from '../store/index'
-import { AlertType } from '../interfaces/AlertItem.interface'
+import { AlertType } from '../types/AlertItem.interface'
 
 const PATH = '/sftp_client'
 const CONN_PATH = `${PATH}/connection`

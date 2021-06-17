@@ -1,47 +1,30 @@
 <template>
-  <div ref="editor"></div>
+  <TransitionFade>
+    <div class="flex flex-col">
+      <Tabs :project="project" class="flex-none h-12"/>
+      <CodeMirror :project="project" class="flex-1"/>
+    </div>
+  </TransitionFade>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import CodeMirror from 'codemirror'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/monokai.css'
+import { ProjectItem } from '../../../../types/ProjectItem.class'
+import Tabs from './tabs/index.vue'
+import TransitionFade from '../../../ui/transitions/Fade.vue'
+import CodeMirror from './codemirror/index.vue'
 
 export default defineComponent({
-  mounted() {
-    CodeMirror(this.$refs.editor as HTMLElement, {
-      lineNumbers: true,
-      theme: 'monokai',
-    })
+  components: {
+    Tabs,
+    TransitionFade,
+    CodeMirror
   },
-  computed: {
-    codemirror(): CodeMirror.Editor {
-      return ((this.$refs.editor as HTMLElement).querySelector('.CodeMirror')! as any).CodeMirror
+  props: {
+    project: {
+      type: Object as PropType<ProjectItem>,
+      required: true
     },
-    activeIndex() {
-      return this.$accessor.tabs.activeIndex
-    }
-  },
-  watch: {
-    activeIndex: function(newIndex: number, oldIndex: number) {
-
-      var newDoc = this.$accessor.tabs.all[newIndex].doc
-      this.$accessor.tabs.updateDoc({
-        index: oldIndex,
-        doc: this.codemirror.swapDoc(newDoc)
-      })
-    }
   }
 })
 </script>
-
-<style>
-.CodeMirror {
-  height: 100%;
-}
-
-.CodeMirror * {
-  font-size: 0.875rem;
-}
-</style>

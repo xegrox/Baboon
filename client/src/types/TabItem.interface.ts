@@ -1,6 +1,6 @@
 import CodeMirror from 'codemirror'
 
-export default interface Tab {
+export interface TabItem {
   path: string
   doc: CodeMirror.Doc
 }

@@ -20,11 +20,11 @@ import { defineComponent } from 'vue'
 import Modal from '../ui/Modal.vue'
 import { FileInfoType } from '../../api/sftp'
 import FileTree from '../ui/FileTree.vue'
-import { TreeBranch } from '../../interfaces/TreeNode.interface'
+import { TreeBranch } from '../../types/TreeNode.interface'
 import TextInput from '../ui/TextInput.vue'
 import ProgressButton from '../ui/ProgressButton.vue'
 import TextButton from '../ui/TextButton.vue'
-import { AlertType } from '../../interfaces/AlertItem.interface'
+import { AlertType } from '../../types/AlertItem.interface'
 
 export default defineComponent({
   components: {

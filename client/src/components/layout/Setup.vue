@@ -20,7 +20,7 @@ import { defineComponent } from 'vue'
 import Modal from '../ui/Modal.vue'
 import TextInput from '../ui/TextInput.vue'
 import ProgressButton from '../ui/ProgressButton.vue'
-import { AlertType } from '../../interfaces/AlertItem.interface'
+import { AlertType } from '../../types/AlertItem.interface'
 
 export default defineComponent({
   components: {

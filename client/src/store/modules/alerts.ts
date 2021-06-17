@@ -1,4 +1,4 @@
-import { AlertItem } from '../../interfaces/AlertItem.interface'
+import { AlertItem } from '../../types/AlertItem.interface'
 import { mutationTree } from 'typed-vuex'
 
 const state = {
@@ -12,7 +12,6 @@ const state = {
 const mutations = mutationTree(state, {
   add(state, item: AlertItem) {
     var previousValue = state.all.get(state.previousKey)
-    console.log(previousValue)
     if (previousValue && JSON.stringify(previousValue.item) === JSON.stringify(item)) {
       previousValue.count += 1
     } else {
