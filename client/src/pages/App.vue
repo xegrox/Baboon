@@ -1,19 +1,15 @@
 <template>
-  <div>
+  <div class="bg-black">
     <Scrim :show="pinging"/>
     <Setup :show="!pinging && !connected" @done="connected = true"/>
     <div class="flex h-screen">
       <div class="flex flex-initial">
         <Projects class="flex-none w-20"/>
       </div>
-      <ProjectWrapper class="flex-auto">
-        <template v-slot="slotProps">
-          <div class="flex h-full w-full">
-            <Explorer class="flex-none w-80" :project="slotProps.project"/>
-            <Editor class="flex-1" :project="slotProps.project"/>
-          </div>
-        </template>
-      </ProjectWrapper>
+      <div class="flex h-full w-full">
+        <Explorer class="flex-none w-80"/>
+        <Editor class="flex-1"/>
+      </div>
     </div>
     <AlertCenter/>
   </div>
@@ -24,7 +20,6 @@ import { defineComponent } from 'vue'
 import Projects from 'components/layout/panes/projects/index.vue'
 import Explorer from 'components/layout/panes/explorer/index.vue'
 import Editor from 'components/layout/panes/editor/index.vue'
-import ProjectWrapper from 'components/layout/panes/ProjectWrapper.vue'
 import Scrim from 'components/ui/Scrim.vue'
 import Setup from 'components/layout/Setup.vue'
 import AlertCenter from 'components/layout/AlertCenter.vue'
@@ -37,7 +32,6 @@ export default defineComponent({
     Projects,
     Explorer,
     Editor,
-    ProjectWrapper,
     Setup,
     Scrim,
     AlertCenter

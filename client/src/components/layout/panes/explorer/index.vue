@@ -1,43 +1,30 @@
 <template>
   <div id="tree" class="flex flex-col bg-gray-900 h-full">
     <div class="flex-none flex h-12 align-bottom items-center pl-5 pr-5">
-      <p id="tree_title" class="text-gray-400 font-mono text-sm">File Explorer</p>
+      <p class="text-gray-400 font-mono text-sm">File Explorer</p>
     </div>
-    <div class="flex-none flex h-10 bg-white align-bottom items-center bg-opacity-5 pl-5 pr-5">
-      <p id="tree_title" class="text-gray-200 font-mono truncate text-sm">{{ project.path }}</p>
-    </div>
-    <div class="flex-1 mt-4 pl-2 pr-2 overflow-auto">
-      <FileTree :item="rootBranch" v-model:activePath="activePath"/>
-    </div>
+    <ProjectWrapper v-slot="slotProps" class="flex-none h-10 bg-white bg-opacity-5">
+      <div class="flex h-full align-bottom items-center pl-5 pr-5">
+        <p class="text-gray-200 font-mono truncate text-sm">{{ slotProps.project.path }}</p>
+      </div>
+    </ProjectWrapper>
+    <ProjectWrapper v-slot="slotProps" class="flex-1 mt-4">
+      <div class="pl-2 pr-2 overflow-auto">
+        <FileTreeWrapper :path="slotProps.project.path" :name="slotProps.project.name"/>
+      </div>
+    </ProjectWrapper>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { ProjectItem } from 'types/ProjectItem.class'
-import FileTree from 'components/ui/FileTree.vue'
-import { TreeBranch } from 'types/TreeNode.interface'
+import { defineComponent } from 'vue'
+import FileTreeWrapper from 'components/ui/FileTreeWrapper.vue'
+import ProjectWrapper from 'components/layout/panes/ProjectWrapper.vue'
 
 export default defineComponent({
   components: {
-    FileTree
-  },
-  props: {
-    project: {
-      type: Object as PropType<ProjectItem>,
-      required: true
-    }
-  },
-  data() {
-    return {
-      rootBranch: <TreeBranch>{
-        name: this.project.name,
-        path: this.project.path,
-        expanded: false,
-        children: []
-      },
-      activePath: this.project.path
-    }
+    FileTreeWrapper,
+    ProjectWrapper
   }
 })
 </script>

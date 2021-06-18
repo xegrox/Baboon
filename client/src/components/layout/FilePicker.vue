@@ -2,7 +2,7 @@
   <Modal :show="show" width="50%" height="70%">
     <div class="w-full h-full flex flex-col gap-5">
       <TextInput placeholder="Path" v-model="path"/>
-      <FileTree class="w-full h-full overflow-auto" :item="rootItem" v-model:activePath="path" :allowFolder="pickFolder" :allowFile="pickFile"/>
+      <FileTreeWrapper class="w-full h-full overflow-auto" :path="rootPath" :name="rootName" @update:activePath="path = $event" :allowFolder="pickFolder" :allowFile="pickFile"/>
       <div class="flex flex-none gap-4 items-center justify-end">
         <TextButton @click="$emit('update:show', false)">
           <p class="pr-4 pl-4">Cancel</p>
@@ -19,8 +19,7 @@
 import { defineComponent } from 'vue'
 import Modal from 'components/ui/Modal.vue'
 import { FileInfoType } from 'api/sftp'
-import FileTree from 'components/ui/FileTree.vue'
-import { TreeBranch } from 'types/TreeNode.interface'
+import FileTreeWrapper from 'components/ui/FileTreeWrapper.vue'
 import TextInput from 'components/ui/TextInput.vue'
 import ProgressButton from 'components/ui/ProgressButton.vue'
 import TextButton from 'components/ui/TextButton.vue'
@@ -30,7 +29,7 @@ import normalize from 'normalize-path'
 export default defineComponent({
   components: {
     Modal,
-    FileTree,
+    FileTreeWrapper,
     TextInput,
     ProgressButton,
     TextButton
@@ -60,12 +59,6 @@ export default defineComponent({
   data() {
     return {
       path: '',
-      rootItem: <TreeBranch>{
-        path: this.rootPath,
-        name: this.rootName,
-        children: [],
-        expanded: false
-      },
       loading: false
     }
   },

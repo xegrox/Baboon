@@ -1,26 +1,23 @@
 <template>
+  <ProjectWrapper v-slot="slotProps">
     <div class="flex flex-col">
-      <Tabs :tabs="project.tabs" :activePath="project.activeTabPath" @update:activePath="project.updateActiveTab" @closeTab="project.removeTab" class="flex-none h-12"/>
-      <CodeViews :tabs="project.tabs" :activePath="project.activeTabPath" class="flex-1"/>
+      <Tabs :tabs="slotProps.project.tabs" :activePath="slotProps.project.activeTabPath" @update:activePath="slotProps.project.updateActiveTab($event)" @closeTab="slotProps.project.removeTab($event)" class="flex-none h-12"/>
+      <CodeViews :tabs="slotProps.project.tabs" :activePath="slotProps.project.activeTabPath" class="flex-1"/>
     </div>
+  </ProjectWrapper>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { ProjectItem } from 'types/ProjectItem.class'
+import { defineComponent } from 'vue'
 import Tabs from './tabs/index.vue'
 import CodeViews from './codeviews/index.vue'
+import ProjectWrapper from 'components/layout/panes/ProjectWrapper.vue'
 
 export default defineComponent({
   components: {
     Tabs,
-    CodeViews
-  },
-  props: {
-    project: {
-      type: Object as PropType<ProjectItem>,
-      required: true
-    },
+    CodeViews,
+    ProjectWrapper
   }
 })
 </script>
