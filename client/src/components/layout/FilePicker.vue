@@ -25,6 +25,7 @@ import TextInput from '../ui/TextInput.vue'
 import ProgressButton from '../ui/ProgressButton.vue'
 import TextButton from '../ui/TextButton.vue'
 import { AlertType } from '../../types/AlertItem.interface'
+import normalize from 'normalize-path'
 
 export default defineComponent({
   components: {
@@ -77,27 +78,27 @@ export default defineComponent({
       })
     },
     checkPath() {
-      let ctx = this
-      ctx.loading = true
-      this.$sftp.exists(this.path).exec({
-        onSuccess(data) {
+      this.loading = true
+      var path = normalize(this.path)
+      this.$sftp.exists(path).exec({
+        onSuccess: (data) => {
           if (!data) {
-            ctx.alertError('Path does not exists')
+            this.alertError('Path does not exists')
             return
           } else {
-            if (ctx.pickFolder && !ctx.pickFile && data !== FileInfoType.dir) {
-              ctx.alertError('Path does not lead to a folder')
+            if (this.pickFolder && !this.pickFile && data !== FileInfoType.dir) {
+              this.alertError('Path does not lead to a folder')
               return
-            } else if (ctx.pickFile && !ctx.pickFolder && data !== FileInfoType.file) {
-              ctx.alertError('Path does not lead to a file')
+            } else if (this.pickFile && !this.pickFolder && data !== FileInfoType.file) {
+              this.alertError('Path does not lead to a file')
               return
             }
-            ctx.$emit('done', ctx.path)
+            this.$emit('done', path)
           }
         },
-        onError: (msg) => ctx.alertError('Error checking if path exists', msg)
+        onError: (msg) => this.alertError('Error checking if path exists', msg)
       })
-      ctx.loading = false
+      this.loading = false
     }
   }
 })
