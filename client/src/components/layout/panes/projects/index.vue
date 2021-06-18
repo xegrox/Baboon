@@ -6,7 +6,7 @@
         <PlusIcon class="w-5 h-5 text-gray-400"/>
       </ProjectBarItem>
       <ProjectBarItem v-for="[key, item] in projects" :key="key" :active="activePath === item.path" @click="setActive(item.path)">
-        <p class="text-xl font-mono">{{ letterFromPath(item.path) }}</p>
+        <p class="text-xl font-mono">{{ item.name.charAt(0).toUpperCase() }}</p>
       </ProjectBarItem>
     </div>
   </div>
@@ -33,13 +33,9 @@ export default defineComponent({
   methods: {
     onSelect(path: string) {
       this.showFilePicker = false
-      this.$accessor.projects.add(new ProjectItem(path))
+      var name = path !== '/' ? path.substring(path.lastIndexOf('/') + 1) : path
+      this.$accessor.projects.add(new ProjectItem(name, path))
       console.log(this.$accessor.projects.all)
-    },
-    letterFromPath(path: string): string {
-      if (path === '/') return path
-      var startIndex = path.lastIndexOf('/') + 1
-      return path.substring(startIndex).charAt(0).toUpperCase()
     },
     setActive(path: string) {
       this.$accessor.projects.updateActive(path)

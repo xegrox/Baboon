@@ -1,11 +1,13 @@
 import { TabItem } from './TabItem.interface'
 
 export class ProjectItem {
+  name: string
   path: string
   activeTabPath = ''
   tabs = new Map<string, TabItem>()
 
-  constructor(path: string) {
+  constructor(name: string, path: string) {
+    this.name = name
     this.path = path
   }
 

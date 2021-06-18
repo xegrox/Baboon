@@ -43,10 +43,7 @@ export default defineComponent({
       type: Number,
       default: 0
     },
-    activePath: {
-      type: String,
-      required: true
-    },
+    activePath: String,
     allowFolder: {
       type: Boolean,
       default: true

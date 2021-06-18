@@ -5,11 +5,13 @@
     <div class="flex h-screen">
       <div class="flex flex-initial">
         <Projects class="flex-none w-20"/>
-        <Explorer class="w-80"/>
       </div>
       <ProjectWrapper class="flex-auto">
         <template v-slot="slotProps">
-          <Editor class="h-full" :project="slotProps.project"/>
+          <div class="flex h-full w-full">
+            <Explorer class="flex-none w-80" :project="slotProps.project"/>
+            <Editor class="flex-1" :project="slotProps.project"/>
+          </div>
         </template>
       </ProjectWrapper>
     </div>
@@ -73,14 +75,14 @@ export default defineComponent({
     })
   },
   beforeMount() {
-    var proj = new ProjectItem('test')
+    var proj = new ProjectItem('test', 'test')
     proj.addTab({
       path: 'babeler.js',
     })
     proj.addTab({
       path: 'index.js',
     })
-    var proj2 = new ProjectItem('another')
+    var proj2 = new ProjectItem('another', 'another')
     proj2.addTab({
       path: 'another.js',
     })
