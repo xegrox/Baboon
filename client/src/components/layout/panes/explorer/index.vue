@@ -14,9 +14,9 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { ProjectItem } from '../../../../types/ProjectItem.class'
-import FileTree from '../../../ui/FileTree.vue'
-import { TreeBranch } from '../../../../types/TreeNode.interface'
+import { ProjectItem } from 'types/ProjectItem.class'
+import FileTree from 'components/ui/FileTree.vue'
+import { TreeBranch } from 'types/TreeNode.interface'
 
 export default defineComponent({
   components: {
@@ -41,6 +41,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-</style>

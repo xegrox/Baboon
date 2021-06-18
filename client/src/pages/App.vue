@@ -21,15 +21,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Projects from '../components/layout/panes/projects/index.vue'
-import Explorer from '../components/layout/panes/explorer/index.vue'
-import Editor from '../components/layout/panes/editor/index.vue'
-import ProjectWrapper from '../components/layout/panes/ProjectWrapper.vue'
-import Scrim from '../components/ui/Scrim.vue'
-import Setup from '../components/layout/Setup.vue'
-import AlertCenter from '../components/layout/AlertCenter.vue'
-import { AlertType } from '../types/AlertItem.interface'
-import { ProjectItem } from '../types/ProjectItem.class'
+import Projects from 'components/layout/panes/projects/index.vue'
+import Explorer from 'components/layout/panes/explorer/index.vue'
+import Editor from 'components/layout/panes/editor/index.vue'
+import ProjectWrapper from 'components/layout/panes/ProjectWrapper.vue'
+import Scrim from 'components/ui/Scrim.vue'
+import Setup from 'components/layout/Setup.vue'
+import AlertCenter from 'components/layout/AlertCenter.vue'
+import { AlertType } from 'types/AlertItem.interface'
+import { ProjectItem } from 'types/ProjectItem.class'
 
 export default defineComponent({
   name: 'Baboon',

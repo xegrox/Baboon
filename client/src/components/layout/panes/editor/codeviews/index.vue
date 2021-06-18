@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { TabItem } from '../../../../../types/TabItem.interface'
+import { TabItem } from 'types/TabItem.interface'
 import CodeMirror from './CodeMirror.vue'
 
 export default defineComponent({

@@ -17,10 +17,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Modal from '../ui/Modal.vue'
-import TextInput from '../ui/TextInput.vue'
-import ProgressButton from '../ui/ProgressButton.vue'
-import { AlertType } from '../../types/AlertItem.interface'
+import Modal from 'components/ui/Modal.vue'
+import TextInput from 'components/ui/TextInput.vue'
+import ProgressButton from 'components/ui/ProgressButton.vue'
+import { AlertType } from 'types/AlertItem.interface'
 
 export default defineComponent({
   components: {
@@ -84,6 +84,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-</style>

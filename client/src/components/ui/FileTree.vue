@@ -15,11 +15,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { FileInfoType } from '../../api/sftp'
-import { TreeNode, TreeBranch, TreeLeaf } from '../../types/TreeNode.interface'
-import { AlertType } from '../../types/AlertItem.interface'
+import { FileInfoType } from 'api/sftp'
+import { TreeNode, TreeBranch, TreeLeaf } from 'types/TreeNode.interface'
+import { AlertType } from 'types/AlertItem.interface'
 import { FileIcon, FolderIcon, ChevronDownIcon } from '@zhuowenli/vue-feather-icons'
-import TransitionExpand from '../ui/transitions/Expand.vue'
+import TransitionExpand from 'components/ui/transitions/Expand.vue'
 import normalize from 'normalize-path'
 
 export default defineComponent({
@@ -116,6 +116,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-</style>

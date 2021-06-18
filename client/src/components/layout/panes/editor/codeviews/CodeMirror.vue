@@ -8,7 +8,7 @@ import { EditorView, keymap } from '@codemirror/view'
 import { EditorState, Compartment } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from "@codemirror/gutter"
 import { history, historyKeymap } from "@codemirror/history"
-import {closeBrackets, closeBracketsKeymap} from "@codemirror/closebrackets"
+import { closeBrackets, closeBracketsKeymap } from "@codemirror/closebrackets"
 import { defaultTabBinding } from "@codemirror/commands"
 import { oneDark, oneDarkTheme, oneDarkHighlightStyle } from '@codemirror/theme-one-dark'
 

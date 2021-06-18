@@ -1,4 +1,4 @@
-import { AlertItem } from '../../types/AlertItem.interface'
+import { AlertItem } from 'types/AlertItem.interface'
 import { mutationTree } from 'typed-vuex'
 
 const state = {

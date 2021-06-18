@@ -25,8 +25,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { SlashIcon, CheckIcon, HelpCircleIcon, XIcon, ChevronDownIcon } from '@zhuowenli/vue-feather-icons'
-import { AlertType } from '../../types/AlertItem.interface'
-import TransitionFade from '../ui/transitions/Fade.vue'
+import { AlertType } from 'types/AlertItem.interface'
+import TransitionFade from 'components/ui/transitions/Fade.vue'
 
 interface Ui {
   color: string,
@@ -103,5 +103,4 @@ export default defineComponent({
 #expand > p {
   height: calc(var(--height) - var(--top-margin))
 }
-
 </style>

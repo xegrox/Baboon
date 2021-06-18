@@ -14,10 +14,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { ProjectItem } from '../../../../types/ProjectItem.class'
+import { ProjectItem } from 'types/ProjectItem.class'
 import { PlusIcon } from '@zhuowenli/vue-feather-icons'
 import ProjectBarItem from './ProjectBarItem.vue'
-import FilePicker from '../../FilePicker.vue'
+import FilePicker from 'components/layout/FilePicker.vue'
 
 export default defineComponent({
   components: {
@@ -51,6 +51,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style scoped>
-</style>

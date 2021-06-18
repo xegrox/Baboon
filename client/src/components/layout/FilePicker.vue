@@ -17,14 +17,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Modal from '../ui/Modal.vue'
-import { FileInfoType } from '../../api/sftp'
-import FileTree from '../ui/FileTree.vue'
-import { TreeBranch } from '../../types/TreeNode.interface'
-import TextInput from '../ui/TextInput.vue'
-import ProgressButton from '../ui/ProgressButton.vue'
-import TextButton from '../ui/TextButton.vue'
-import { AlertType } from '../../types/AlertItem.interface'
+import Modal from 'components/ui/Modal.vue'
+import { FileInfoType } from 'api/sftp'
+import FileTree from 'components/ui/FileTree.vue'
+import { TreeBranch } from 'types/TreeNode.interface'
+import TextInput from 'components/ui/TextInput.vue'
+import ProgressButton from 'components/ui/ProgressButton.vue'
+import TextButton from 'components/ui/TextButton.vue'
+import { AlertType } from 'types/AlertItem.interface'
 import normalize from 'normalize-path'
 
 export default defineComponent({
@@ -103,6 +103,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-</style>

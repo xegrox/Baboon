@@ -1,5 +1,5 @@
 <template>
-  <div id="root" class="flex flex-col absolute top-0 right-0 pt-5 z-40 overflow-hidden h-full justify-end transition-all pointer-events-none">
+  <div class="flex flex-col absolute top-0 right-0 pt-5 pr-3 w-96 z-40 overflow-hidden h-full justify-end transition-all pointer-events-none">
     <transition-group name="alert-list" @leave="animLeave">
       <Alert v-for="[key, value] in alerts" :key="key" :title="value.item.title" :count="value.count" :content="value.item.content" :type="value.item.type" class="alert-item transition-all duration-500 mb-3 pointer-events-auto" @close="remove(key)"/>
     </transition-group>
@@ -8,7 +8,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { AlertItem } from '../../types/AlertItem.interface'
 import Alert from '../ui/Alert.vue'
 
 export default defineComponent({
@@ -37,13 +36,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-#root {
-  --margin-right: 0.75rem;
-  padding-right: var(--margin-right);
-  --root-width: 24rem;
-  width: var(--root-width);
-}
-
 .alert-list-enter-from,
 .alert-list-leave-to {
   opacity: 0;

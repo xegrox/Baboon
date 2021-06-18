@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+
 export default defineComponent({
   computed: {
     projects() {
@@ -21,6 +22,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="css" scoped>
-</style>

@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { ProjectItem } from '../../../../types/ProjectItem.class'
+import { ProjectItem } from 'types/ProjectItem.class'
 import Tabs from './tabs/index.vue'
 import CodeViews from './codeviews/index.vue'
 
