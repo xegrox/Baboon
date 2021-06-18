@@ -7,12 +7,16 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@codemirror/closebrackets": "^0.18.0",
+    "@codemirror/commands": "^0.18.3",
+    "@codemirror/gutter": "^0.18.4",
+    "@codemirror/history": "^0.18.1",
+    "@codemirror/theme-one-dark": "^0.18.1",
+    "@codemirror/view": "^0.18.17",
     "@types/normalize-path": "^3.0.0",
-    "@zhuowenli/vue-feather-icons": "^5.0.2",
-    "lsp-codemirror": "^0.2.9"
+    "@zhuowenli/vue-feather-icons": "^5.0.2"
   },
   "devDependencies": {
-    "@types/codemirror": "^5.60.0",
     "@types/tailwindcss": "^2.0.3",
     "@types/vue-feather-icons": "^5.0.2",
     "@vitejs/plugin-vue": "^1.2.2",

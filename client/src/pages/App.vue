@@ -28,7 +28,6 @@ import Setup from '../components/layout/Setup.vue'
 import AlertCenter from '../components/layout/AlertCenter.vue'
 import { AlertType } from '../types/AlertItem.interface'
 import { ProjectItem } from '../types/ProjectItem.class'
-import CodeMirror from 'codemirror'
 
 export default defineComponent({
   name: 'Baboon',
@@ -77,20 +76,17 @@ export default defineComponent({
     var proj = new ProjectItem('test')
     proj.addTab({
       path: 'babeler.js',
-      doc: CodeMirror.Doc('babeler')
     })
     proj.addTab({
       path: 'index.js',
-      doc: CodeMirror.Doc('index')
     })
     var proj2 = new ProjectItem('another')
     proj2.addTab({
       path: 'another.js',
-      doc: CodeMirror.Doc('another')
     })
     this.$accessor.projects.add(proj)
     this.$accessor.projects.add(proj2)
-    this.$accessor.projects.updateActive('another')
+    this.$accessor.projects.updateActive('test')
   }
 })
 </script>
