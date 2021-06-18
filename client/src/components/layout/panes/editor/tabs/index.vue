@@ -1,12 +1,12 @@
 <template>
   <div class="flex">
-    <TabBarItem v-for="[key, tab] in project.tabs" :key="key" :name="tab.path" :isActive="project.activeTabPath === tab.path"  @click="updateActive(key)" @close="removeTab(key)"></TabBarItem>
+    <TabBarItem v-for="[key, tab] in tabs" :key="key" :name="tab.path" :isActive="activePath === tab.path"  @click="$emit('update:activePath', tab.path)" @close="$emit('closeTab', tab.path)"></TabBarItem>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { ProjectItem } from '../../../../../types/ProjectItem.class'
+import { TabItem } from '../../../../../types/TabItem.interface'
 import TabBarItem from './TabBarItem.vue'
 
 export default defineComponent({
@@ -14,21 +14,14 @@ export default defineComponent({
    TabBarItem
   },
   props: {
-    project: {
-      type: Object as PropType<ProjectItem>,
+    tabs: {
+      type: Object as PropType<Map<string, TabItem>>,
       required: true
-    }
-  },
-  methods: {
-    updateActive(path: string) {
-      this.project.updateActiveTab(path)
     },
-    removeTab(path: string) {
-      this.project.removeTab(path)
+    activePath: {
+      type: String,
+      required: true
     }
   }
 })
 </script>
-
-<style scoped>
-</style>

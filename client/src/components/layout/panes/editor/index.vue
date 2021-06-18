@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col">
-      <Tabs :project="project" class="flex-none h-12"/>
-      <CodeViews :project="project" class="flex-1"/>
+      <Tabs :tabs="project.tabs" :activePath="project.activeTabPath" @update:activePath="project.updateActiveTab" @closeTab="project.removeTab" class="flex-none h-12"/>
+      <CodeViews :tabs="project.tabs" :activePath="project.activeTabPath" class="flex-1"/>
     </div>
 </template>
 
