@@ -7,7 +7,7 @@
         <TextButton @click="$emit('update:show', false)">
           <p class="pr-4 pl-4">Cancel</p>
         </TextButton>
-        <ProgressButton :loading="loading" @click="checkPath" indeterminate>
+        <ProgressButton :loading="loading" :disabled="path === ''" @click="checkPath" indeterminate>
           <p class="pr-4 pl-4">Open</p>
         </ProgressButton>
       </div>
