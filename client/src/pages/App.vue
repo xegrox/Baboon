@@ -1,7 +1,7 @@
 <template>
   <div class="bg-black">
     <Scrim :show="pinging"/>
-    <Setup :show="!pinging && !connected" @done="connected = true"/>
+    <Setup :show="!pinging && !$accessor.sftp.connected" @done="$accessor.sftp.setConnected(true)" class="z-20"/>
     <div class="flex h-screen">
       <div class="flex flex-initial">
         <Projects class="flex-none w-20"/>
@@ -11,7 +11,7 @@
         <Editor class="flex-1"/>
       </div>
     </div>
-    <AlertCenter/>
+    <AlertCenter class="z-30"/>
   </div>
 </template>
 
@@ -38,9 +38,7 @@ export default defineComponent({
   },
   data() {
     return {
-      pinging: true,
-      connected: false,
-      test: true
+      pinging: true
     }
   },
   computed: {
@@ -53,7 +51,7 @@ export default defineComponent({
     this.$sftp.ping().exec({
       onSuccess: (data) => {
         if (data.hasConnection) {
-          this.connected = true
+          this.$accessor.sftp.setConnected(true)
         } else {
          if (data.hasClient) {
            this.$accessor.alerts.add({

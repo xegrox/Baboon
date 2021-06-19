@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col absolute top-0 right-0 pt-5 pr-3 w-96 z-40 overflow-hidden h-full justify-end transition-all pointer-events-none">
+  <div class="flex flex-col absolute top-0 right-0 pt-5 pr-3 w-96 overflow-hidden h-full justify-end transition-all pointer-events-none">
     <transition-group name="alert-list" @leave="animLeave">
       <Alert v-for="[key, value] in alerts" :key="key" :title="value.item.title" :count="value.count" :content="value.item.content" :type="value.item.type" class="alert-item transition-all duration-500 mb-3 pointer-events-auto" @close="remove(key)"/>
     </transition-group>

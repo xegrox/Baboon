@@ -77,6 +77,7 @@ class SFTPAction<T = any> {
             title: 'SFTP connection lost'
           })
           SFTPInstance.disconnect().exec()
+          return
         }
       }
       msg ??= e.message
