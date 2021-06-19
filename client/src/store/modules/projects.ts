@@ -9,10 +9,14 @@ const state = {
 const mutations = mutationTree(state, {
   add(state, item: ProjectItem) {
     state.all.set(item.path, item)
+    state.activePath = item.path
   },
 
   remove(state, path: string) {
     state.all.delete(path)
+    if (path === state.activePath && state.all.size > 0) {
+      state.activePath = state.all.values().next().value.path
+    }
   },
 
   updateActive(state, path: string) {

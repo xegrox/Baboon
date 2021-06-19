@@ -19,7 +19,7 @@ export class ProjectItem {
   removeTab(path: string) {
     this.tabs.delete(path)
     if (path === this.activeTabPath && this.tabs.size > 0) {
-      this.updateActiveTab(this.tabs.values().next().value.path)
+      this.activeTabPath = this.tabs.values().next().value.path
     }
   }
 

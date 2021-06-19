@@ -6,10 +6,12 @@
       <div class="flex flex-initial">
         <Projects class="flex-none w-20"/>
       </div>
-      <div class="flex h-full w-full">
-        <Explorer class="flex-none w-80"/>
-        <Editor class="flex-1"/>
-      </div>
+      <FadeTransition>
+        <div v-show="this.$accessor.projects.all.size > 0" class="flex h-full w-full">
+          <Explorer class="flex-none w-80"/>
+          <Editor class="flex-1"/>
+        </div>
+      </FadeTransition>
     </div>
     <AlertCenter class="z-30"/>
   </div>
@@ -23,6 +25,7 @@ import Editor from 'components/layout/panes/editor/index.vue'
 import Scrim from 'components/ui/Scrim.vue'
 import Setup from 'components/layout/Setup.vue'
 import AlertCenter from 'components/layout/AlertCenter.vue'
+import FadeTransition from 'components/ui/transitions/Fade.vue'
 import { AlertType } from 'types/AlertItem.interface'
 import { ProjectItem } from 'types/ProjectItem.class'
 
@@ -33,6 +36,7 @@ export default defineComponent({
     Explorer,
     Editor,
     Setup,
+    FadeTransition,
     Scrim,
     AlertCenter
   },
