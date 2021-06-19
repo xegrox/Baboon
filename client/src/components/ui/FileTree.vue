@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div :style="indent" class="flex gap-2 rounded-lg items-center bg-gray-100 bg-opacity-0 hover:bg-opacity-5 transition-colors pr-5 pt-2 pb-2" :class="{ 'bg-opacity-10': isActive, 'pointer-events-none opacity-50': !isBranch(item) && disabled }" @click="onClick(item)">
+    <div :style="indent" class="flex gap-2 rounded-lg items-center bg-gray-100 bg-opacity-0 hover:bg-opacity-5 transition-colors pr-5 pt-2 pb-2" :class="{ 'bg-opacity-10': isActive, 'pointer-events-none opacity-50': !isBranch(item) && disabled }" @click="onClick">
       <component :is="isBranch(item) ? 'FolderIcon': 'FileIcon'" class="flex-none text-white"/>
       <p class="text-white truncate text-sm">{{ item.name }}</p>
       <ChevronDownIcon v-if="isBranch(item)" class="flex-none ml-auto text-gray-400 transition-all transform" :class="{ 'rotate-180': item.expanded }"/>
     </div>
     <TransitionExpand>
       <div v-if="isBranch(item)" v-show="item.expanded">
-        <FileTree v-for="node in item.children" :key="node" :item="node" :depth="depth+1" :activePath="activePath" :allowFile="allowFile" :allowFolder="allowFolder" @update:activePath="$emit('update:activePath', $event)"/>
+        <FileTree v-for="node in item.children" :key="node" :item="node" :depth="depth+1" :activePath="activePath" :allowFile="allowFile" :allowFolder="allowFolder" @clickFile="$emit('clickFile', $event)" @update:activePath="$emit('update:activePath', $event)"/>
       </div>
     </TransitionExpand>
   </div>
@@ -32,7 +32,7 @@ export default defineComponent({
   },
   props: {
     item: {
-      type: Object as PropType<TreeBranch>,
+      type: Object as PropType<TreeNode>,
       required: true
     },
     depth: {
@@ -71,10 +71,12 @@ export default defineComponent({
     isBranch(item: TreeNode): item is TreeBranch {
       return (item as TreeBranch).children != undefined
     },
-    onClick(node: TreeNode) {
+    onClick() {
       if (!this.disabled) this.$emit('update:activePath', this.item.path)
-      if (this.isBranch(node)) {
-        !node.expanded ? this.fillChildren(node) : node.expanded = false
+      if (this.isBranch(this.item)) {
+        !this.item.expanded ? this.fillChildren(this.item) : this.item.expanded = false
+      } else {
+        this.$emit('clickFile', this.item.path)
       }
     },
     fillChildren(branch: TreeBranch) {

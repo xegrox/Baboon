@@ -4,6 +4,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { AlertType } from 'types/AlertItem.interface'
 import { EditorView, keymap, highlightActiveLine } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/gutter'
@@ -15,36 +16,16 @@ import { theme } from 'assets/js/cm-theme'
 import { javascript } from '@codemirror/lang-javascript'
 
 export default defineComponent({
+  props: {
+    path: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
       view: new EditorView({
         state: EditorState.create({
-          doc: `module.exports = function(data: string) {
-  var xml, tmp;
-  if (!data || typeof data !== 'string') {
-		return null;
-  }
-  try {
-    if (window.DOMParser) {
-      tmp = new DOMParser();
-      xml = tmp.parseFromString(data, "text/html");
-    } else { // IE
-      xml = new ActiveXObject("Microsoft.XMLDOM");
-      xml.async = false;
-      xml.loadXML(data);
-    }
-  } catch (e) {
-    xml = undefined;
-  }
-  if (!xml || !xml.documentElement || xml.getElementsByTagName(PARSE_ERROR).length) {
-    jQuery.error("Invalid XML: " + data);
-  }
-  return xml;
-};
-
-const parser: Object = document.createElement('a');
-parser.href = "http://example.com:3000/pathname/?search=test#hash";
-parser.hostname; // => "example.com"`,
           extensions: [
             lineNumbers(),
             highlightActiveLineGutter(),
@@ -67,6 +48,24 @@ parser.hostname; // => "example.com"`,
     }
   },
   mounted() {
+    this.$sftp.read(this.path).exec({
+      onSuccess: (data: string) => {
+        this.view.dispatch({
+          changes: {
+            from: 0,
+            to: this.view.state.doc.length,
+            insert: data
+          }
+        })
+      },
+      onError: (msg) => {
+        this.$accessor.alerts.add({
+          type: AlertType.Error,
+          title: 'Failed to read file',
+          content: msg
+        })
+      }
+    });
     (this.$refs.editor as HTMLElement).appendChild(this.view.dom)
   },
 })

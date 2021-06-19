@@ -53,4 +53,15 @@ router.post('/exists', (req, res) => {
   })
 })
 
+router.post('/read', (req, res) => {
+  req.locals.client.get(req.body.path).then((data: Buffer) => {
+    res.status(200).send(data.toString())
+  }).catch((e: NodeJS.ErrnoException) => {
+    res.status(400).send({
+      msg: e.message,
+      code: e.code
+    })
+  })
+})
+
 module.exports = router

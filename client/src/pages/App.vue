@@ -67,22 +67,6 @@ export default defineComponent({
       },
       onError: () => {}
     })
-  },
-  beforeMount() {
-    var proj = new ProjectItem('test', 'test')
-    proj.addTab({
-      path: 'babeler.js',
-    })
-    proj.addTab({
-      path: 'index.js',
-    })
-    var proj2 = new ProjectItem('another', 'another')
-    proj2.addTab({
-      path: 'another.js',
-    })
-    this.$accessor.projects.add(proj)
-    this.$accessor.projects.add(proj2)
-    this.$accessor.projects.updateActive('test')
   }
 })
 </script>
