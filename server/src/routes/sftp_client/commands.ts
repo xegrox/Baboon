@@ -33,7 +33,7 @@ router.post('/list', (req, res) => {
         name: value.name,
         type: value.type
       }
-    }))
+    }).sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())))
   }).catch((e: NodeJS.ErrnoException) => {
     res.status(400).send({
       msg: e.message,
