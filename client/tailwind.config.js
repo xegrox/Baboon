@@ -1,9 +1,23 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
+const plugin = require('tailwindcss/plugin')
 
 module.exports = {
+  plugins: [
+    plugin(function({ addVariant }) {
+      addVariant('important', ({ container }) => {
+        container.walkRules(rule => {
+          rule.selector = `.\\!${rule.selector.slice(1)}`
+          rule.walkDecls(decl => {
+            decl.important = true
+          })
+        })
+      })
+    })
+  ],
   variants: {
     extend: {
-      scale: ['group-hover']
+      scale: ['group-hover'],
+      transitionProperty: ['important']
     },
   },
   theme: {

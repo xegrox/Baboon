@@ -5,7 +5,7 @@
       <ProjectBarItem @click="showFilePicker = true">
         <PlusIcon class="w-5 h-5 text-gray-400"/>
       </ProjectBarItem>
-      <ProjectBarItem v-for="[key, item] in projects" :key="key" :active="activePath === item.path" @click="setActive(item.path)">
+      <ProjectBarItem v-for="[key, item] in projects" :key="key" :active="activePath === item.path" @click="setActive(item.path)" @close="this.$accessor.projects.remove(key)">
         <p class="text-xl font-mono">{{ item.name.charAt(0).toUpperCase() }}</p>
       </ProjectBarItem>
     </div>
