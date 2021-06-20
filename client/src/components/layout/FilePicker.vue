@@ -58,7 +58,7 @@ export default defineComponent({
   },
   data() {
     return {
-      path: '',
+      path: this.rootPath,
       loading: false
     }
   },
