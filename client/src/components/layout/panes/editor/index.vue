@@ -1,7 +1,7 @@
 <template>
   <ProjectWrapper v-slot="slotProps">
     <div class="flex flex-col">
-      <Tabs :tabs="slotProps.project.tabs" :activePath="slotProps.project.activeTabPath" @update:activePath="slotProps.project.updateActiveTab($event)" @closeTab="slotProps.project.removeTab($event)" class="flex-none h-12"/>
+      <Tabs :rootPath="slotProps.project.path" :tabs="slotProps.project.tabs" :activePath="slotProps.project.activeTabPath" @update:activePath="slotProps.project.updateActiveTab($event)" @closeTab="slotProps.project.removeTab($event)" class="flex-none h-12"/>
       <CodeViews :tabs="slotProps.project.tabs" :activePath="slotProps.project.activeTabPath" class="flex-1"/>
     </div>
   </ProjectWrapper>

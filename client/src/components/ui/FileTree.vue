@@ -20,7 +20,7 @@ import { TreeNode, TreeBranch, TreeLeaf } from 'types/TreeNode.interface'
 import { AlertType } from 'types/AlertItem.interface'
 import { FileIcon, FolderIcon, ChevronDownIcon } from '@zhuowenli/vue-feather-icons'
 import TransitionExpand from 'components/ui/transitions/Expand.vue'
-import normalize from 'normalize-path'
+import p from 'path-browserify'
 
 export default defineComponent({
   name: 'FileTree',
@@ -85,7 +85,7 @@ export default defineComponent({
       this.$sftp.list(branch.path).exec({
         onSuccess(data) {
           data.forEach((f) => {
-            var path = normalize(`${branch.path}/${f.name}`)
+            var path = p.normalize(`${branch.path}/${f.name}`)
             switch(f.type) {
               case FileInfoType.dir:
                 var d: TreeBranch = {

@@ -24,7 +24,7 @@ import TextInput from 'components/ui/TextInput.vue'
 import ProgressButton from 'components/ui/ProgressButton.vue'
 import TextButton from 'components/ui/TextButton.vue'
 import { AlertType } from 'types/AlertItem.interface'
-import normalize from 'normalize-path'
+import p from 'path-browserify'
 
 export default defineComponent({
   components: {
@@ -72,7 +72,7 @@ export default defineComponent({
     },
     checkPath() {
       this.loading = true
-      var path = normalize(this.path)
+      var path = p.normalize(this.path)
       this.$sftp.exists(path).exec({
         onSuccess: (data) => {
           if (!data) {
