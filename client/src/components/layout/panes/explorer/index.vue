@@ -10,7 +10,7 @@
     </ProjectWrapper>
     <ProjectWrapper v-slot="slotProps" class="flex-1 mt-4">
       <div class="pl-2 pr-2 overflow-auto">
-        <FileTreeWrapper :path="slotProps.project.path" :name="slotProps.project.name" @clickFile="slotProps.project.addTab({path: $event})"/>
+        <FileTreeWrapper :path="slotProps.project.path" :name="slotProps.project.name" @clickFile="slotProps.project.addTab($event)"/>
       </div>
     </ProjectWrapper>
   </div>

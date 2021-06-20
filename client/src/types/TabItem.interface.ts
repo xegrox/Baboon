@@ -1,3 +1,4 @@
 export interface TabItem {
-  path: string
+  path: string,
+  modified: boolean
 }

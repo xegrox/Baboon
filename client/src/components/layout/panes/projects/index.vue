@@ -35,7 +35,6 @@ export default defineComponent({
       this.showFilePicker = false
       var name = path !== '/' ? path.substring(path.lastIndexOf('/') + 1) : path
       this.$accessor.projects.add(new ProjectItem(name, path))
-      console.log(this.$accessor.projects.all)
     },
     setActive(path: string) {
       this.$accessor.projects.updateActive(path)

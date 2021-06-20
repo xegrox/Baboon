@@ -6,7 +6,7 @@
 import { defineComponent } from 'vue'
 import { AlertType } from 'types/AlertItem.interface'
 import { EditorView, keymap, highlightActiveLine } from '@codemirror/view'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Text, Transaction } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/gutter'
 import { history, historyKeymap } from '@codemirror/history'
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/closebrackets'
@@ -24,39 +24,51 @@ export default defineComponent({
   },
   data() {
     return {
-      view: new EditorView({
-        state: EditorState.create({
-          extensions: [
-            lineNumbers(),
-            highlightActiveLineGutter(),
-            highlightActiveLine(),
-            history(),
-            closeBrackets(),
-            indentOnInput(),
-            keymap.of([
-              defaultTabBinding,
-              ...historyKeymap,
-              ...closeBracketsKeymap
-            ]),
-            theme,
-            javascript({
-              typescript: true
-            })
-          ]
-        })
-      })
+      dbTimerId: setTimeout(() => {}, 0),
+      initialDoc: Text.empty,
+    }
+  },
+  methods: {
+    compareDocEq(doc: Text) {
+      return this.initialDoc.length === doc.length || this.initialDoc.eq(doc)
+    },
+    debounceFunc(f: Function) {
+      clearTimeout(this.dbTimerId)
+      this.dbTimerId = setTimeout(f, 200)
     }
   },
   mounted() {
     this.$sftp.read(this.path).exec({
       onSuccess: (data: string) => {
-        this.view.dispatch({
-          changes: {
-            from: 0,
-            to: this.view.state.doc.length,
-            insert: data
-          }
+        var view = new EditorView({
+          parent: this.$refs.editor as HTMLElement,
+          state: EditorState.create({
+            doc: data,
+            extensions: [
+              EditorView.updateListener.of((v) => {
+                if (v.docChanged) {
+                  this.debounceFunc(() => this.$emit('modified', !this.compareDocEq(v.state.doc)))
+                }
+              }),
+              lineNumbers(),
+              highlightActiveLineGutter(),
+              highlightActiveLine(),
+              history(),
+              closeBrackets(),
+              indentOnInput(),
+              keymap.of([
+                defaultTabBinding,
+                ...historyKeymap,
+                ...closeBracketsKeymap
+              ]),
+              theme,
+              javascript({
+                typescript: true
+              })
+            ]
+          })
         })
+        this.initialDoc = view.state.doc
       },
       onError: (msg) => {
         this.$accessor.alerts.add({
@@ -66,7 +78,6 @@ export default defineComponent({
         })
       }
     });
-    (this.$refs.editor as HTMLElement).appendChild(this.view.dom)
   },
 })
 </script>

@@ -11,9 +11,12 @@ export class ProjectItem {
     this.path = path
   }
 
-  addTab(item: TabItem) {
-    this.tabs.set(item.path, item)
-    this.activeTabPath = item.path
+  addTab(path: string) {
+    this.tabs.set(path, {
+      path: path,
+      modified: false
+    })
+    this.activeTabPath = path
   }
 
   removeTab(path: string) {
