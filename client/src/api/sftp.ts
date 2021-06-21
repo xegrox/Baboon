@@ -52,7 +52,8 @@ const SFTPInstance = {
   ping: () => new SFTPAction<PingInfo>(`${CONN_PATH}/ping`, undefined),
   list: (path: string) => new SFTPAction<FileInfo[]>(`${CMD_PATH}/list`, {path: path}),
   exists: (path: string) => new SFTPAction<false | FileInfoType>(`${CMD_PATH}/exists`, {path: path}),
-  read: (path: string) => new SFTPAction<string>(`${CMD_PATH}/read`, {path: path})
+  read: (path: string) => new SFTPAction<string>(`${CMD_PATH}/read`, {path: path}),
+  write: (path: string, content: string) => new SFTPAction(`${CMD_PATH}/write`, {path: path, content: content})
 }
 
 class SFTPAction<T = any> {

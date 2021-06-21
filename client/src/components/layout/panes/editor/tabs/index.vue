@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <TabBarItem v-for="[key, tab] in tabs" :key="key" :name="nameFromPath(tab.path)" :isActive="activePath === tab.path"  :isModified="tab.modified" @click="$emit('update:activePath', tab.path)" @close="$emit('closeTab', tab.path)"></TabBarItem>
+    <TabBarItem v-for="[key, tab] in tabs" :key="key" :name="nameFromPath(tab.path)" :isActive="activePath === tab.path"  :isModified="tab.modified" :isSaving="tab.saving" @click="$emit('update:activePath', tab.path)" @close="$emit('closeTab', tab.path)"></TabBarItem>
   </div>
 </template>
 

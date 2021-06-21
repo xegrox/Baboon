@@ -64,4 +64,15 @@ router.post('/read', (req, res) => {
   })
 })
 
+router.post('/write', (req, res) => {
+  req.locals.client.put(Buffer.from(req.body.content), req.body.path).then(() => {
+    res.sendStatus(200)
+  }).catch((e: NodeJS.ErrnoException) => {
+    res.status(400).send({
+      msg: e.message,
+      code: e.code
+    })
+  })
+})
+
 module.exports = router

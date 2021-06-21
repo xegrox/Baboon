@@ -6,7 +6,7 @@
 import { defineComponent } from 'vue'
 import { AlertType } from 'types/AlertItem.interface'
 import { EditorView, keymap, highlightActiveLine } from '@codemirror/view'
-import { EditorState, Text, Transaction } from '@codemirror/state'
+import { EditorState, Text } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/gutter'
 import { history, historyKeymap } from '@codemirror/history'
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/closebrackets'
@@ -24,17 +24,37 @@ export default defineComponent({
   },
   data() {
     return {
-      dbTimerId: setTimeout(() => {}, 0),
+      view: new EditorView(),
+      dbModTimerId: setTimeout(() => {}, 0),
+      dbSvTimerId: setTimeout(() => {}, 0),
       initialDoc: Text.empty,
     }
   },
   methods: {
     compareDocEq(doc: Text) {
-      return this.initialDoc.length === doc.length || this.initialDoc.eq(doc)
+      return this.initialDoc.length === doc.length && this.initialDoc.eq(doc)
     },
-    debounceFunc(f: Function) {
-      clearTimeout(this.dbTimerId)
-      this.dbTimerId = setTimeout(f, 200)
+    debounceFunc(id: number, f: Function) {
+      clearTimeout(id)
+      id = setTimeout(f, 300)
+    },
+    writeFile(content: string) {
+      this.$emit('saving', true)
+      this.$sftp.write(this.path, content).exec({
+        onSuccess: () => {
+          this.initialDoc = this.view.state.doc
+          this.$emit('modified', false)
+          this.$emit('saving', false)
+        },
+        onError: (msg) => {
+          this.$accessor.alerts.add({
+            type: AlertType.Error,
+            title: 'Failed to write file',
+            content: msg
+          })
+          this.$emit('saving', false)
+        }
+      })
     }
   },
   mounted() {
@@ -47,7 +67,8 @@ export default defineComponent({
             extensions: [
               EditorView.updateListener.of((v) => {
                 if (v.docChanged) {
-                  this.debounceFunc(() => this.$emit('modified', !this.compareDocEq(v.state.doc)))
+                  clearTimeout(this.dbModTimerId)
+                  this.dbModTimerId = setTimeout(() => this.$emit('modified', !this.compareDocEq(v.state.doc)), 500)
                 }
               }),
               lineNumbers(),
@@ -61,6 +82,14 @@ export default defineComponent({
                 ...historyKeymap,
                 ...closeBracketsKeymap
               ]),
+              keymap.of([{
+                key: 'c-s',
+                run: (v) => {
+                  clearTimeout(this.dbModTimerId)
+                  this.dbSvTimerId = setTimeout(() => this.writeFile(v.state.doc.toString()), 500)
+                  return true
+                }
+              }]),
               theme,
               javascript({
                 typescript: true
@@ -69,6 +98,7 @@ export default defineComponent({
           })
         })
         this.initialDoc = view.state.doc
+        this.view = view
       },
       onError: (msg) => {
         this.$accessor.alerts.add({

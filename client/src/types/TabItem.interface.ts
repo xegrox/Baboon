@@ -1,4 +1,5 @@
 export interface TabItem {
   path: string,
-  modified: boolean
+  modified: boolean,
+  saving: boolean
 }

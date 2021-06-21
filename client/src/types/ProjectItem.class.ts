@@ -14,7 +14,8 @@ export class ProjectItem {
   addTab(path: string) {
     this.tabs.set(path, {
       path: path,
-      modified: false
+      modified: false,
+      saving: false
     })
     this.activeTabPath = path
   }
