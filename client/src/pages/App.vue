@@ -1,19 +1,19 @@
 <template>
   <div class="bg-black">
     <Scrim :show="pinging"/>
-    <Setup :show="!pinging && !$accessor.sftp.connected" @done="$accessor.sftp.setConnected(true)" class="z-20"/>
+    <Setup :show="!pinging && !$accessor.sftp.connected" @done="$accessor.sftp.setConnected(true)" class="z-30"/>
     <div class="flex h-screen">
       <div class="flex flex-initial">
         <Projects class="flex-none w-20"/>
       </div>
       <FadeTransition>
-        <div v-show="this.$accessor.projects.all.size > 0" class="flex h-full w-full">
+        <div v-if="this.$accessor.projects.all.size > 0" class="flex h-full w-full">
           <Explorer class="flex-none w-80"/>
           <Editor class="flex-1"/>
         </div>
       </FadeTransition>
     </div>
-    <AlertCenter class="z-30"/>
+    <AlertCenter class="z-40"/>
   </div>
 </template>
 

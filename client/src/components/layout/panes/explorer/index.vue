@@ -1,5 +1,5 @@
 <template>
-  <div id="tree" class="flex flex-col bg-gray-900 h-full">
+  <div class="flex flex-col bg-gray-900 h-full">
     <div class="flex-none flex h-12 align-bottom items-center pl-5 pr-5">
       <p class="text-gray-400 font-mono text-sm">File Explorer</p>
     </div>
@@ -20,11 +20,15 @@
 import { defineComponent } from 'vue'
 import FileTreeWrapper from 'components/ui/FileTreeWrapper.vue'
 import ProjectWrapper from 'components/layout/panes/ProjectWrapper.vue'
+import ContextMenu from 'components/ui/ContextMenu.vue'
+import ContextMenuItem from 'components/ui/ContextMenuItem.vue'
 
 export default defineComponent({
   components: {
     FileTreeWrapper,
-    ProjectWrapper
+    ProjectWrapper,
+    ContextMenu,
+    ContextMenuItem
   }
 })
 </script>

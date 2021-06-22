@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :style="indent" class="flex gap-2 rounded-lg items-center bg-gray-100 bg-opacity-0 hover:bg-opacity-5 transition-colors pr-5 pt-2 pb-2" :class="{ 'bg-opacity-10': isActive, 'pointer-events-none opacity-50': !isBranch(item) && disabled }" @click="onClick">
+    <div :style="indent" class="flex gap-2 rounded-lg items-center bg-gray-100 bg-opacity-0 hover:bg-opacity-5 transition-colors pr-5 pt-2 pb-2" :class="{ 'bg-opacity-10': isActive, 'pointer-events-none opacity-50': !isBranch(item) && disabled }" @contextmenu.prevent="$emit('update:activePath', item.path)" @click="onClick">
       <component :is="isBranch(item) ? 'FolderIcon': 'FileIcon'" class="flex-none text-white"/>
       <p class="text-white truncate text-sm">{{ item.name }}</p>
       <ChevronDownIcon v-if="isBranch(item)" class="flex-none ml-auto text-gray-400 transition-all transform" :class="{ 'rotate-180': item.expanded }"/>
