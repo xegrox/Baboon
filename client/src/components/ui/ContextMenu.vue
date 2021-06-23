@@ -1,13 +1,13 @@
 <template>
-  <teleport to="body">
-    <FadeTransition>
-      <div v-if="show" class="absolute w-full h-full left-0 bottom-0 z-20" @click="close" @contextmenu.prevent="close">
-        <div ref="menu" class="bg-gray-900 border-gray-800 border-2 rounded-lg absolute overflow-hidden" :style="{ 'left': pos.x + 'px', 'top': pos.y + 'px' }">
-          <slot/>
+    <teleport to="body">
+      <FadeTransition>
+        <div v-if="show" class="absolute w-full h-full left-0 bottom-0 z-20" @click="close" @contextmenu.prevent="close">
+          <div ref="menu" class="bg-gray-900 border-gray-800 border-2 rounded-lg absolute overflow-hidden" :style="{ 'left': pos.x + 'px', 'top': pos.y + 'px' }">
+            <slot/>
+          </div>
         </div>
-      </div>
-    </FadeTransition>
-  </teleport>
+      </FadeTransition>
+    </teleport>
 </template>
 
 <script lang="ts">

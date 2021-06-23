@@ -10,7 +10,7 @@
     </ProjectWrapper>
     <ProjectWrapper v-slot="slotProps" class="flex-1 mt-4">
       <div class="pl-2 pr-2 overflow-auto">
-        <FileTreeWrapper :path="slotProps.project.path" :name="slotProps.project.name" @clickFile="slotProps.project.addTab($event)"/>
+        <FileTreeWrapper ref="tree" :path="slotProps.project.path" :name="slotProps.project.name" @clickItem="onClickItem"/>
       </div>
     </ProjectWrapper>
   </div>
@@ -29,6 +29,14 @@ export default defineComponent({
     ProjectWrapper,
     ContextMenu,
     ContextMenuItem
+  },
+  methods: {
+    onClickItem(path: string, isFolder: boolean) {
+      if (!isFolder) {
+        var projects = this.$accessor.projects
+        projects.all.get(projects.activePath)!.addTab(path)
+      }
+    }
   }
 })
 </script>

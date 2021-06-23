@@ -53,7 +53,8 @@ const SFTPInstance = {
   list: (path: string) => new SFTPAction<FileInfo[]>(`${CMD_PATH}/list`, {path: path}),
   exists: (path: string) => new SFTPAction<false | FileInfoType>(`${CMD_PATH}/exists`, {path: path}),
   read: (path: string) => new SFTPAction<string>(`${CMD_PATH}/read`, {path: path}),
-  write: (path: string, content: string) => new SFTPAction(`${CMD_PATH}/write`, {path: path, content: content})
+  write: (path: string, content: string) => new SFTPAction(`${CMD_PATH}/write`, {path: path, content: content}),
+  mkdir: (path: string) => new SFTPAction(`${CMD_PATH}/mkdir`, {path: path})
 }
 
 class SFTPAction<T = any> {
@@ -63,9 +64,9 @@ class SFTPAction<T = any> {
     this.promise = Axios.post<T>(url, body)
   }
 
-  exec(_?: {onSuccess?: (data: T) => void, onError?: (msg: string) => void}) {
-    this.promise.then((res) => {
-      _?.onSuccess?.(res.data)
+  async exec<R>(_?: {onSuccess?: (data: T) => R, onError?: (msg: string) => R}) {
+    return this.promise.then((res) => {
+      return _?.onSuccess?.(res.data)
     }).catch((e: AxiosError | Error) => {
       var msg: string
       if (Axios.isAxiosError(e)) {
@@ -78,11 +79,11 @@ class SFTPAction<T = any> {
             title: 'SFTP connection lost'
           })
           SFTPInstance.disconnect().exec()
-          return
+          return undefined
         }
       }
       msg ??= e.message
-      _?.onError?.(msg)
+      return _?.onError?.(msg)
     })
   }
 }

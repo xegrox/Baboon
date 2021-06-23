@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
-      <input ref="input" :type="type !== 'number' ? type : ''" @keypress="isNumber" @paste.prevent @input="updateValue" @keyup.enter="$emit('enter')" :value="modelValue" :disabled="disabled" :autofocus="autofocus"  autocomplete="off" :class="{ filled: modelValue !== '', 'opacity-75': disabled}" class="appearance-none rounded-lg w-full px-3 py-3 pt-5 pb-2 bg-gray-700 text-gray-200"/>
-      <label class="absolute mb-0 -mt-2 pt-4 pl-3 leading-tighter text-gray-400 text-base mt-2 cursor-text pointer-events-none">{{ placeholder }}</label>
+    <input ref="input" :type="type !== 'number' ? type : ''" @keypress="isNumber" @paste.prevent @input="updateValue" @keyup.enter="$emit('enter')" :value="modelValue" :disabled="disabled" autocomplete="off" :class="{ filled: modelValue !== '', 'opacity-75': disabled}" class="appearance-none rounded-lg w-full px-3 py-3 pt-5 pb-2 bg-gray-700 text-gray-200"/>
+    <label class="absolute mb-0 -mt-2 pt-4 pl-3 leading-tighter text-gray-400 text-base mt-2 cursor-text pointer-events-none">{{ placeholder }}</label>
   </div>
 </template>
 
@@ -24,6 +24,9 @@ export default defineComponent({
       type: Boolean,
       default: false
     }
+  },
+  mounted() {
+    if (this.autofocus) (this.$refs.input as HTMLInputElement).focus()
   },
   methods: {
     updateValue(event: Event) {

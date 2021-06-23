@@ -75,4 +75,15 @@ router.post('/write', (req, res) => {
   })
 })
 
+router.post('/mkdir', (req, res) => {
+  req.locals.client.mkdir(req.body.path, true).then(() => {
+    res.sendStatus(200)
+  }).catch((e: NodeJS.ErrnoException) => {
+    res.status(400).send({
+      msg: e.message,
+      code: e.code
+    })
+  })
+})
+
 module.exports = router
