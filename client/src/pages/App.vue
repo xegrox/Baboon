@@ -1,7 +1,7 @@
 <template>
   <div class="bg-black">
     <Scrim :show="pinging"/>
-    <Setup :show="!pinging && !$accessor.sftp.connected" @done="$accessor.sftp.setConnected(true)" class="z-30"/>
+    <Setup ref="setup" @done="$accessor.sftp.setConnected(true)" bindClass="z-30"/>
     <div class="flex h-screen">
       <div class="flex flex-initial">
         <Projects class="flex-none w-20"/>
@@ -45,7 +45,16 @@ export default defineComponent({
       pinging: true
     }
   },
+  mounted() {
+    this.$watch('isConnected', (connected: boolean) => {
+      var setup = this.$refs.setup as any
+      connected ? setup.close() : setup.open()
+    }, { immediate: true })
+  },
   computed: {
+    isConnected(): boolean {
+      return this.$accessor.sftp.connected
+    },
     activeProject(): ProjectItem {
       var projectStore = this.$accessor.projects
       return projectStore.all.get(projectStore.activePath)!

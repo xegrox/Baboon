@@ -1,5 +1,5 @@
 <template>
-  <Modal :show="show">
+  <Modal ref="modal">
     <div class="flex flex-col gap-y-4">
       <h1 class="text-2xl font-black text-white">Connect with SFTP</h1>
       <div/>
@@ -28,9 +28,6 @@ export default defineComponent({
     TextInput,
     ProgressButton
   },
-  props: {
-    show: Boolean
-  },
   data() {
     return {
       sftp: {
@@ -49,6 +46,8 @@ export default defineComponent({
     }
   },
   methods: {
+    open() { (this.$refs.modal as any).open() },
+    close() { (this.$refs.modal as any).close() },
     focusRef(refName: string) {
       (this.$refs[refName] as any).focus()
     },

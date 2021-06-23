@@ -1,8 +1,8 @@
 <template>
   <div>
-    <FilePicker v-model:show="showFilePicker" rootName="/" rootPath="/" @done="onSelect" pickFolder/>
+    <FilePicker ref="filepicker" rootName="/" rootPath="/" @done="onSelect" pickFolder/>
     <div class="h-full bg-gray-800 flex flex-col items-center pt-7 gap-5">
-      <ProjectBarItem @click="showFilePicker = true">
+      <ProjectBarItem @click="$refs.filepicker.open()">
         <PlusIcon class="w-5 h-5 text-gray-400"/>
       </ProjectBarItem>
       <ProjectBarItem v-for="[key, item] in projects" :key="key" :active="activePath === item.path" @click="setActive(item.path)" @close="this.$accessor.projects.remove(key)">
@@ -25,14 +25,8 @@ export default defineComponent({
     FilePicker,
     ProjectBarItem
   },
-  data() {
-    return {
-      showFilePicker: false
-    }
-  },
   methods: {
     onSelect(path: string) {
-      this.showFilePicker = false
       var name = path !== '/' ? path.substring(path.lastIndexOf('/') + 1) : path
       this.$accessor.projects.add(new ProjectItem(name, path))
     },

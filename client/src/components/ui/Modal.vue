@@ -2,7 +2,7 @@
   <div>
     <teleport to="body">
       <FadeTransition>
-        <div v-show="show" class="absolute top-0 left-0 w-full h-full z-20 bg-black bg-opacity-50">
+        <div v-show="show" class="absolute top-0 left-0 w-full h-full z-20 bg-black bg-opacity-50" :class="bindClass" @click.self="(dismissible) ? close() : ''">
           <div :style="{ 'width': width, 'height': height }" class="p-8 bg-gray-800 shadow-md hover:shadow-lg rounded-2xl absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 p-10">
             <slot/>
           </div>
@@ -21,9 +21,9 @@ export default defineComponent({
     FadeTransition
   },
   props: {
-    show: {
+    dismissible: {
       type: Boolean,
-      required: true
+      default: false
     },
     width: {
       type: String,
@@ -32,7 +32,17 @@ export default defineComponent({
     height: {
       type: String,
       default: ''
+    },
+    bindClass: String
+  },
+  data() {
+    return {
+      show: false
     }
+  },
+  methods: {
+    open() { this.show = true },
+    close() { this.show = false }
   }
 })
 </script>
