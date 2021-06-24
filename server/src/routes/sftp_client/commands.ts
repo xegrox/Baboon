@@ -89,4 +89,26 @@ router.post('/mkdir', (req, res) => {
   })
 })
 
+router.post('/rmdir', (req, res) => {
+  req.locals.client.rmdir(req.body.path, true).then(() => {
+    res.sendStatus(200)
+  }).catch((e: NodeJS.ErrnoException) => {
+    res.status(400).send({
+      msg: e.message,
+      code: e.code
+    })
+  })
+})
+
+router.post('/delete', (req, res) => {
+  req.locals.client.delete(req.body.path).then(() => {
+    res.sendStatus(200)
+  }).catch((e: NodeJS.ErrnoException) => {
+    res.status(400).send({
+      msg: e.message,
+      code: e.code
+    })
+  })
+})
+
 module.exports = router

@@ -54,7 +54,9 @@ const SFTPInstance = {
   exists: (path: string) => new SFTPAction<false | FileInfoType>(`${CMD_PATH}/exists`, {path: path}),
   read: (path: string) => new SFTPAction<string>(`${CMD_PATH}/read`, {path: path}),
   write: (path: string, content: string) => new SFTPAction(`${CMD_PATH}/write`, {path: path, content: content}),
-  mkdir: (path: string) => new SFTPAction(`${CMD_PATH}/mkdir`, {path: path})
+  mkdir: (path: string) => new SFTPAction(`${CMD_PATH}/mkdir`, {path: path}),
+  delete: (path: string) => new SFTPAction(`${CMD_PATH}/delete`, {path: path}),
+  rmdir: (path: string) => new SFTPAction(`${CMD_PATH}/rmdir`, {path: path})
 }
 
 class SFTPAction<T = any> {

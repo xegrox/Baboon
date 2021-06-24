@@ -2,12 +2,13 @@
   <div>
     <FileTree :item="root" :activePath="active.path" :allowFile="allowFile" :allowFolder="allowFolder" @update:activePath="onActiveUpdate" @contextmenu.prevent="showCtxMenu($event)" @clickItem="(p, b) => $emit('clickItem', p, b)"/>
     <ContextMenu ref="ctxmenu">
-      <ContextMenuItem text="New file" shortcut="A" @click="showPathPrompt('newfileprompt')"/>
-      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="showPathPrompt('newfolderprompt')"/>
-      <ContextMenuItem text="Delete" shortcut="Backspace"/>
+      <ContextMenuItem text="New file" shortcut="A" @click="showPathPrompt('newFilePrompt')"/>
+      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="showPathPrompt('newFolderPrompt')"/>
+      <ContextMenuItem text="Delete" shortcut="Backspace" @click="showActionDialog('deletePathDialog')"/>
     </ContextMenu>
-    <InputPrompt icon="FileIcon" ref="newfileprompt" placeholder="Path to new file" @enter="createNewFile"/>
-    <InputPrompt icon="FolderIcon" ref="newfolderprompt" placeholder="Path to new folder" @enter="createNewFolder"/>
+    <InputPrompt ref="newFilePrompt" placeholder="Path to new file" @enter="createNewFile"/>
+    <InputPrompt ref="newFolderPrompt" placeholder="Path to new folder" @enter="createNewFolder"/>
+    <ActionDialog ref="deletePathDialog" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(active.path)"/>
   </div>
 </template>
 
@@ -18,7 +19,9 @@ import FileTree from './FileTree.vue'
 import ContextMenu from 'components/ui/ContextMenu.vue'
 import ContextMenuItem from 'components/ui/ContextMenuItem.vue'
 import InputPrompt from 'components/ui/InputPrompt.vue'
+import ActionDialog from 'components/ui/ActionDialog.vue'
 import { AlertType } from 'types/AlertItem.interface'
+import { FileInfoType } from 'api/sftp'
 import p from 'path-browserify'
 
 export default defineComponent({
@@ -26,7 +29,8 @@ export default defineComponent({
     FileTree,
     ContextMenu,
     ContextMenuItem,
-    InputPrompt
+    InputPrompt,
+    ActionDialog
   },
   props: {
     path: {
@@ -79,16 +83,14 @@ export default defineComponent({
       prompt.setValue(rootPath)
       prompt.open()
     },
+    showActionDialog(refName: string) {
+      var dialog = this.$refs[refName] as any
+      dialog.open()
+    },
     async checkFileExists(path: string) {
-      return await this.$sftp.exists(path).exec<boolean | undefined>({
+      return await this.$sftp.exists(path).exec<false | FileInfoType | undefined>({
         onSuccess: (exists) => {
-          if (exists) {
-            this.$accessor.alerts.add({
-              type: AlertType.Error,
-              title: 'File already exists'
-            })
-          }
-          return exists ? true : false
+          return exists
         },
         onError: (msg) => {
           this.$accessor.alerts.add({
@@ -100,39 +102,91 @@ export default defineComponent({
         }
       })
     },
+    alertPathExists() {
+      this.$accessor.alerts.add({
+        type: AlertType.Error,
+        title: 'Path with same name already exists'
+      })
+    },
+    alertPathNotExists() {
+      this.$accessor.alerts.add({
+        type: AlertType.Error,
+        title: 'Path does not exists'
+      })
+    },
     createNewFile(path: string) {
       this.checkFileExists(path).then((exists) => {
-        if (exists) return
-        this.$sftp.write(path, '').exec({
-          onSuccess: () => {
-            // TODO: refresh tree
-            (this.$refs.newfileprompt as any).close()
-          },
-          onError: (msg) => {
-            this.$accessor.alerts.add({
-              type: AlertType.Error,
-              title: 'Failed to create new file',
-              content: msg
-            })
-          }
-        })
+        if (exists) {
+          this.alertPathExists()
+          return
+        } else {
+          this.$sftp.write(path, '').exec({
+            onSuccess: () => {
+              // TODO: refresh tree
+              (this.$refs.newFilePrompt as any).close()
+            },
+            onError: (msg) => {
+              this.$accessor.alerts.add({
+                type: AlertType.Error,
+                title: 'Failed to create new file',
+                content: msg
+              })
+            }
+          })
+        }
       })
     },
     createNewFolder(path: string) {
       this.checkFileExists(path).then((exists) => {
-        if (exists) return
-        this.$sftp.mkdir(path).exec({
-          onSuccess: () => {
-            (this.$refs.newfolderprompt as any).close()
-          },
-          onError: (msg) => {
-            this.$accessor.alerts.add({
-              type: AlertType.Error,
-              title: 'Failed to create folder',
-              content: msg
-            })
-          }
-        })
+        if (exists) {
+          this.alertPathExists()
+        } else {
+          this.$sftp.mkdir(path).exec({
+            onSuccess: () => {
+              (this.$refs.newFolderPrompt as any).close()
+            },
+            onError: (msg) => {
+              this.$accessor.alerts.add({
+                type: AlertType.Error,
+                title: 'Failed to create folder',
+                content: msg
+              })
+            }
+          })
+        }
+      })
+    },
+    deletePath(path: string) {
+      this.checkFileExists(path).then((exists) => {
+        if (!exists) {
+          this.alertPathNotExists()
+        } else if (exists === FileInfoType.dir) {
+          this.$sftp.rmdir(path).exec({
+            onSuccess: () => {
+              (this.$refs.deletePathDialog as any).close()
+            },
+            onError: (msg) => {
+              this.$accessor.alerts.add({
+                type: AlertType.Error,
+                title: 'Failed to delete folder',
+                content: msg
+              })
+            }
+          })
+        } else {
+          this.$sftp.delete(path).exec({
+            onSuccess: () => {
+              (this.$refs.deletePathDialog as any).close()
+            },
+            onError: (msg) => {
+              this.$accessor.alerts.add({
+                type: AlertType.Error,
+                title: 'Failed to delete file',
+                content: msg
+              })
+            }
+          })
+        }
       })
     }
   }

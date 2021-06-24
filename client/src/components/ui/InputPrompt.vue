@@ -17,11 +17,7 @@ export default defineComponent({
     TextInput,
   },
   props: {
-    placeholder: String,
-    icon: {
-      type: String,
-      required: true
-    }
+    placeholder: String
   },
   data() {
     return {
