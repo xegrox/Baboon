@@ -2,13 +2,13 @@
   <div>
     <FileTree :item="root" :activePath="active.path" :allowFile="allowFile" :allowFolder="allowFolder" @update:activePath="onActiveUpdate" @contextmenu.prevent="showCtxMenu($event)" @clickItem="(p, b) => $emit('clickItem', p, b)"/>
     <ContextMenu ref="ctxmenu">
-      <ContextMenuItem text="New file" shortcut="A" @click="showPathPrompt('newFilePrompt')"/>
-      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="showPathPrompt('newFolderPrompt')"/>
-      <ContextMenuItem text="Delete" shortcut="Backspace" @click="showActionDialog('deletePathDialog')"/>
+      <ContextMenuItem text="New file" shortcut="A" @click="refNewFilePrompt.setValue(getActiveDirPath()); refNewFilePrompt.open()"/>
+      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="refNewFolderPrompt.setValue(getActiveDirPath()); refNewFolderPrompt.open()"/>
+      <ContextMenuItem text="Delete" shortcut="Backspace" @click="refDeletePathPrompt.open()"/>
     </ContextMenu>
     <InputPrompt ref="newFilePrompt" placeholder="Path to new file" @enter="createNewFile"/>
     <InputPrompt ref="newFolderPrompt" placeholder="Path to new folder" @enter="createNewFolder"/>
-    <ActionDialog ref="deletePathDialog" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(active.path)"/>
+    <ActionDialog ref="deletePathPrompt" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(active.path)"/>
   </div>
 </template>
 
@@ -65,28 +65,30 @@ export default defineComponent({
       createPath: ''
     }
   },
+  computed: {
+    refNewFilePrompt(): any { return this.$refs.newFilePrompt as any },
+    refNewFolderPrompt(): any { return this.$refs.newFolderPrompt as any },
+    refDeletePathPrompt(): any { return this.$refs.deletePathPrompt as any }
+  },
   methods: {
     showCtxMenu(e: MouseEvent) {
       var menu = this.$refs.ctxmenu as any
       menu.setPos(e.x, e.y)
       menu.open()
     },
+
     onActiveUpdate(path: string, isFolder: boolean) {
       this.active = { path, isFolder }
       this.$emit('update:activePath', path, isFolder)
     },
-    showPathPrompt(refName: string) {
-      var prompt = this.$refs[refName] as any
-      var rootPath = this.active.path
-      if (!this.active.isFolder) rootPath = p.dirname(rootPath)
-      if (rootPath.charAt(rootPath.length - 1) !== p.sep) rootPath += p.sep
-      prompt.setValue(rootPath)
-      prompt.open()
+
+    getActiveDirPath() {
+      var dirPath = this.active.path
+      if (!this.active.isFolder) dirPath = p.dirname(dirPath)
+      if (dirPath.charAt(dirPath.length - 1) !== p.sep) dirPath += p.sep
+      return dirPath
     },
-    showActionDialog(refName: string) {
-      var dialog = this.$refs[refName] as any
-      dialog.open()
-    },
+
     async checkFileExists(path: string) {
       return await this.$sftp.exists(path).exec<false | FileInfoType | undefined>({
         onSuccess: (exists) => {
@@ -95,37 +97,36 @@ export default defineComponent({
         onError: (msg) => {
           this.$accessor.alerts.add({
             type: AlertType.Error,
-            title: 'Unable to check if file already exists',
+            title: 'Unable to check if file exists',
             content: msg
           })
           return undefined
         }
       })
     },
-    alertPathExists() {
-      this.$accessor.alerts.add({
-        type: AlertType.Error,
-        title: 'Path with same name already exists'
-      })
-    },
+
     alertPathNotExists() {
       this.$accessor.alerts.add({
         type: AlertType.Error,
         title: 'Path does not exists'
       })
     },
+
     createNewFile(path: string) {
+      this.refNewFilePrompt.setDisabled(true)
       this.checkFileExists(path).then((exists) => {
         if (exists) {
-          this.alertPathExists()
-          return
+          this.refNewFilePrompt.setDisabled(false)
+          this.refNewFilePrompt.setError('Path with same name already exists')
         } else {
           this.$sftp.write(path, '').exec({
             onSuccess: () => {
               // TODO: refresh tree
-              (this.$refs.newFilePrompt as any).close()
+              this.refNewFilePrompt.setDisabled(false)
+              this.refNewFilePrompt.close()
             },
             onError: (msg) => {
+              this.refNewFilePrompt.setDisabled(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to create new file',
@@ -136,16 +137,21 @@ export default defineComponent({
         }
       })
     },
+
     createNewFolder(path: string) {
+      this.refNewFolderPrompt.setDisabled(true)
       this.checkFileExists(path).then((exists) => {
         if (exists) {
-          this.alertPathExists()
+          this.refNewFolderPrompt.setDisabled(false)
+          this.refNewFolderPrompt.setError('Path with same name already exists')
         } else {
           this.$sftp.mkdir(path).exec({
             onSuccess: () => {
-              (this.$refs.newFolderPrompt as any).close()
+              this.refNewFolderPrompt.setDisabled(false)
+              this.refNewFolderPrompt.close()
             },
             onError: (msg) => {
+              this.refNewFolderPrompt.setDisabled(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to create folder',
@@ -156,16 +162,21 @@ export default defineComponent({
         }
       })
     },
+
     deletePath(path: string) {
+      this.refDeletePathPrompt.setLoading(true)
       this.checkFileExists(path).then((exists) => {
         if (!exists) {
+          this.refDeletePathPrompt.setLoading(false)
           this.alertPathNotExists()
         } else if (exists === FileInfoType.dir) {
           this.$sftp.rmdir(path).exec({
             onSuccess: () => {
-              (this.$refs.deletePathDialog as any).close()
+              this.refDeletePathPrompt.setLoading(false)
+              this.refDeletePathPrompt.close()
             },
             onError: (msg) => {
+              this.refDeletePathPrompt.setLoading(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to delete folder',
@@ -176,9 +187,11 @@ export default defineComponent({
         } else {
           this.$sftp.delete(path).exec({
             onSuccess: () => {
-              (this.$refs.deletePathDialog as any).close()
+              this.refDeletePathPrompt.setLoading(false)
+              this.refDeletePathPrompt.close()
             },
             onError: (msg) => {
+              this.refDeletePathPrompt.setLoading(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to delete file',

@@ -5,7 +5,7 @@
       <TextButton @click="$refs.modal.close()">
         <p class="pr-4 pl-4">Cancel</p>
       </TextButton>
-      <ProgressButton @click="$emit('positive')">
+      <ProgressButton :loading="loading" @click="$emit('positive')" indeterminate>
         <p class="pr-4 pl-4">{{ actionText }}</p>
       </ProgressButton>
     </div>
@@ -34,9 +34,15 @@ export default defineComponent({
       required: true
     }
   },
+  data() {
+    return {
+      loading: false
+    }
+  },
   methods: {
     open() { (this.$refs.modal as any).open() },
     close() { (this.$refs.modal as any).close() },
+    setLoading(b: boolean) { this.loading = b }
   }
 })
 </script>
