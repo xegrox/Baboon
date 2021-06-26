@@ -2,8 +2,8 @@
   <div>
     <FileTree :item="rootBranch" :activePath="activeNode.path" :allowFile="allowFile" :allowFolder="allowFolder" @rightClickNode="onRightClickNode" @clickNode="onClickNode"/>
     <ContextMenu ref="ctxmenu">
-      <ContextMenuItem text="New file" shortcut="A" @click="refNewFilePrompt.setValue(getNodeBranchPath(activeNode)); refNewFilePrompt.open()"/>
-      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="refNewFolderPrompt.setValue(getNodeBranchPath(activeNode)); refNewFolderPrompt.open()"/>
+      <ContextMenuItem text="New file" shortcut="A" @click="openInputPathDialog(refNewFilePrompt)"/>
+      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="openInputPathDialog(refNewFolderPrompt)"/>
       <ContextMenuItem text="Delete" shortcut="Backspace" @click="refDeletePathPrompt.open()"/>
     </ContextMenu>
     <InputPrompt ref="newFilePrompt" placeholder="Path to new file" @enter="createNewFile"/>
@@ -76,10 +76,13 @@ export default defineComponent({
       this.$emit('clickNode', node, event)
     },
 
-    getNodeBranchPath(node: TreeNode) {
-      var dirPath = node.path
-      if (node instanceof TreeLeaf)  dirPath = node.parent.path
-      return p.normalize(dirPath + p.sep)
+    getNodeBranch(node: TreeNode): TreeBranch {
+      return (node instanceof TreeLeaf) ? node.parent : node as TreeBranch
+    },
+
+    openInputPathDialog(ref: any) {
+      ref.setValue(p.normalize(this.getNodeBranch(this.activeNode).path + p.sep))
+      ref.open()
     },
 
     async checkFileExists(path: string) {
@@ -107,7 +110,15 @@ export default defineComponent({
         } else {
           this.$sftp.write(path, '').exec({
             onSuccess: () => {
-              // TODO: refresh tree
+              var parentNode = this.getNodeBranch(this.activeNode)
+              if (parentNode.expanded) {
+                var leaf = new TreeLeaf(path, parentNode)
+                var insertIndex = parentNode.children.findIndex((n) =>
+                  n instanceof TreeLeaf && leaf.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
+                )
+                if (insertIndex === -1) insertIndex = parentNode.children.length
+                parentNode.children.splice(insertIndex, 0, leaf)
+              }
               this.refNewFilePrompt.close()
             },
             onError: (msg) => {
@@ -132,6 +143,15 @@ export default defineComponent({
         } else {
           this.$sftp.mkdir(path).exec({
             onSuccess: () => {
+              var parentNode = this.getNodeBranch(this.activeNode)
+              if (parentNode.expanded) {
+                var branch = new TreeBranch(path, parentNode)
+                var insertIndex = parentNode.children.findIndex((n) =>
+                  n instanceof TreeLeaf || branch.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
+                )
+                if (insertIndex === -1) insertIndex = 0
+                parentNode.children.splice(insertIndex, 0, branch)
+              }
               this.refNewFolderPrompt.close()
             },
             onError: (msg) => {
@@ -171,9 +191,11 @@ export default defineComponent({
           }
           cmd.exec({
             onSuccess: () => {
-              // TODO: remove node
+              var parentChildren = this.activeNode.parent?.children
+              parentChildren?.splice(parentChildren.findIndex((n) => n.path === path), 1)
             },
             onError: (msg) => {
+              // TODO: refresh tree
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to delete path',

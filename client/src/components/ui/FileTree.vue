@@ -7,7 +7,7 @@
     </div>
     <TransitionExpand>
       <div v-if="item.children" v-show="item.expanded">
-        <FileTree v-for="node in item.children" :key="node" :item="node" :depth="depth+1" :allowFile="allowFile" :allowFolder="allowFolder" :activePath="activePath" @rightClickNode="(n, e) => $emit('rightClickNode', n ,e)" @clickNode="(n, e) => $emit('clickNode', n, e)"/>
+        <FileTree v-for="node in item.children" :key="node.name" :item="node" :depth="depth+1" :allowFile="allowFile" :allowFolder="allowFolder" :activePath="activePath" @rightClickNode="(n, e) => $emit('rightClickNode', n ,e)" @clickNode="(n, e) => $emit('clickNode', n, e)"/>
       </div>
     </TransitionExpand>
   </div>
