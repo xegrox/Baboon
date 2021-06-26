@@ -59,14 +59,14 @@ const SFTPInstance = {
   rmdir: (path: string) => new SFTPAction(`${CMD_PATH}/rmdir`, {path: path})
 }
 
-class SFTPAction<T = any> {
+export class SFTPAction<T = any> {
   private promise: Promise<AxiosResponse<any>>
 
   constructor(url: string, body: any) {
     this.promise = Axios.post<T>(url, body)
   }
 
-  async exec<R>(_?: {onSuccess?: (data: T) => R, onError?: (msg: string) => R}) {
+  async exec<R>(_?: {onSuccess?: (data: T) => R, onError?: (msg: string) => R, onDone?: () => void}) {
     return this.promise.then((res) => {
       return _?.onSuccess?.(res.data)
     }).catch((e: AxiosError | Error) => {
@@ -86,7 +86,7 @@ class SFTPAction<T = any> {
       }
       msg ??= e.message
       return _?.onError?.(msg)
-    })
+    }).finally(_?.onDone)
   }
 }
 

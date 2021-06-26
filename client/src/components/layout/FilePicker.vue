@@ -2,7 +2,7 @@
   <Modal ref="model" width="50%" height="70%" dismissible>
     <div class="w-full h-full flex flex-col gap-5">
       <TextInput placeholder="Path" v-model="path"/>
-      <FileTreeWrapper class="w-full h-full overflow-auto" :path="rootPath" :name="rootName" @update:activePath="path = $event" :allowFolder="pickFolder" :allowFile="pickFile"/>
+      <FileTreeWrapper class="w-full h-full overflow-auto" :path="rootPath" :name="rootName" @activePathUpdate="path = $event" :allowFolder="pickFolder" :allowFile="pickFile"/>
       <div class="flex flex-none gap-4 items-center justify-end">
         <TextButton @click="$refs.model.close()">
           <p class="pr-4 pl-4">Cancel</p>

@@ -10,7 +10,7 @@
     </ProjectWrapper>
     <ProjectWrapper v-slot="slotProps" class="flex-1 mt-4">
       <div class="pl-2 pr-2 overflow-auto">
-        <FileTreeWrapper ref="tree" :path="slotProps.project.path" :name="slotProps.project.name" @clickItem="onClickItem"/>
+        <FileTreeWrapper ref="tree" :path="slotProps.project.path" :name="slotProps.project.name" @clickNode="onClickNode"/>
       </div>
     </ProjectWrapper>
   </div>
@@ -22,6 +22,7 @@ import FileTreeWrapper from 'components/ui/FileTreeWrapper.vue'
 import ProjectWrapper from 'components/layout/panes/ProjectWrapper.vue'
 import ContextMenu from 'components/ui/ContextMenu.vue'
 import ContextMenuItem from 'components/ui/ContextMenuItem.vue'
+import { TreeNode, TreeLeaf } from 'types/TreeNode.class'
 
 export default defineComponent({
   components: {
@@ -31,10 +32,10 @@ export default defineComponent({
     ContextMenuItem
   },
   methods: {
-    onClickItem(path: string, isFolder: boolean) {
-      if (!isFolder) {
+    onClickNode(node: TreeNode) {
+      if (node instanceof TreeLeaf) {
         var projects = this.$accessor.projects
-        projects.all.get(projects.activePath)!.addTab(path)
+        projects.all.get(projects.activePath)?.addTab(node.path)
       }
     }
   }

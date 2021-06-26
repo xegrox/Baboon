@@ -1,3 +1,5 @@
+<!-- TODO: get rid of this stupid wrapper -->
+
 <template>
   <div class="relative">
     <div v-for="[key, project] in projects" :key="key" class="w-full h-full absolute" :class="{ 'pointer-events-none': !isActive(project.path) }">

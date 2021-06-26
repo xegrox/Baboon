@@ -1,27 +1,27 @@
 <template>
   <div>
-    <FileTree :item="root" :activePath="active.path" :allowFile="allowFile" :allowFolder="allowFolder" @update:activePath="onActiveUpdate" @contextmenu.prevent="showCtxMenu($event)" @clickItem="(p, b) => $emit('clickItem', p, b)"/>
+    <FileTree :item="rootBranch" :activePath="activeNode.path" :allowFile="allowFile" :allowFolder="allowFolder" @rightClickNode="onRightClickNode" @clickNode="onClickNode"/>
     <ContextMenu ref="ctxmenu">
-      <ContextMenuItem text="New file" shortcut="A" @click="refNewFilePrompt.setValue(getActiveDirPath()); refNewFilePrompt.open()"/>
-      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="refNewFolderPrompt.setValue(getActiveDirPath()); refNewFolderPrompt.open()"/>
+      <ContextMenuItem text="New file" shortcut="A" @click="refNewFilePrompt.setValue(getNodeBranchPath(activeNode)); refNewFilePrompt.open()"/>
+      <ContextMenuItem text="New folder" shortcut="Shift+A" @click="refNewFolderPrompt.setValue(getNodeBranchPath(activeNode)); refNewFolderPrompt.open()"/>
       <ContextMenuItem text="Delete" shortcut="Backspace" @click="refDeletePathPrompt.open()"/>
     </ContextMenu>
     <InputPrompt ref="newFilePrompt" placeholder="Path to new file" @enter="createNewFile"/>
     <InputPrompt ref="newFolderPrompt" placeholder="Path to new folder" @enter="createNewFolder"/>
-    <ActionDialog ref="deletePathPrompt" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(active.path)"/>
+    <ActionDialog ref="deletePathPrompt" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(activeNode.path)"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { TreeBranch } from 'types/TreeNode.interface'
+import { TreeNode, TreeBranch, TreeLeaf } from 'types/TreeNode.class'
 import FileTree from './FileTree.vue'
 import ContextMenu from 'components/ui/ContextMenu.vue'
 import ContextMenuItem from 'components/ui/ContextMenuItem.vue'
 import InputPrompt from 'components/ui/InputPrompt.vue'
 import ActionDialog from 'components/ui/ActionDialog.vue'
 import { AlertType } from 'types/AlertItem.interface'
-import { FileInfoType } from 'api/sftp'
+import { SFTPAction, FileInfoType } from 'api/sftp'
 import p from 'path-browserify'
 
 export default defineComponent({
@@ -37,10 +37,6 @@ export default defineComponent({
       type: String,
       required: true
     },
-    name: {
-      type: String,
-      required: true
-    },
     allowFile: {
       type: Boolean,
       default: true
@@ -51,18 +47,10 @@ export default defineComponent({
     }
   },
   data() {
+    var rootBranch: TreeBranch = new TreeBranch(this.path, undefined)
     return {
-      root: <TreeBranch>{
-        name: this.name,
-        path: this.path,
-        children: [],
-        expanded: false
-      },
-      active: {
-        path: this.path,
-        isFolder: true
-      },
-      createPath: ''
+      rootBranch: rootBranch,
+      activeNode: rootBranch as TreeNode
     }
   },
   computed: {
@@ -71,22 +59,27 @@ export default defineComponent({
     refDeletePathPrompt(): any { return this.$refs.deletePathPrompt as any }
   },
   methods: {
-    showCtxMenu(e: MouseEvent) {
+    getRootBranch() { return this.rootBranch },
+    getActiveNode() { return this.activeNode },
+
+    onRightClickNode(node: TreeNode, event: MouseEvent) {
+      this.activeNode = node
       var menu = this.$refs.ctxmenu as any
-      menu.setPos(e.x, e.y)
+      menu.setPos(event.x, event.y)
       menu.open()
+      this.$emit('rightClickNode', node, event)
     },
 
-    onActiveUpdate(path: string, isFolder: boolean) {
-      this.active = { path, isFolder }
-      this.$emit('update:activePath', path, isFolder)
+    onClickNode(node: TreeNode, event: MouseEvent) {
+      this.activeNode = node
+      this.$emit('activePathUpdate', node.path)
+      this.$emit('clickNode', node, event)
     },
 
-    getActiveDirPath() {
-      var dirPath = this.active.path
-      if (!this.active.isFolder) dirPath = p.dirname(dirPath)
-      if (dirPath.charAt(dirPath.length - 1) !== p.sep) dirPath += p.sep
-      return dirPath
+    getNodeBranchPath(node: TreeNode) {
+      var dirPath = node.path
+      if (node instanceof TreeLeaf)  dirPath = node.parent.path
+      return p.normalize(dirPath + p.sep)
     },
 
     async checkFileExists(path: string) {
@@ -105,13 +98,6 @@ export default defineComponent({
       })
     },
 
-    alertPathNotExists() {
-      this.$accessor.alerts.add({
-        type: AlertType.Error,
-        title: 'Path does not exists'
-      })
-    },
-
     createNewFile(path: string) {
       this.refNewFilePrompt.setDisabled(true)
       this.checkFileExists(path).then((exists) => {
@@ -122,17 +108,16 @@ export default defineComponent({
           this.$sftp.write(path, '').exec({
             onSuccess: () => {
               // TODO: refresh tree
-              this.refNewFilePrompt.setDisabled(false)
               this.refNewFilePrompt.close()
             },
             onError: (msg) => {
-              this.refNewFilePrompt.setDisabled(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to create new file',
                 content: msg
               })
-            }
+            },
+            onDone: () => this.refNewFilePrompt.setDisabled(false)
           })
         }
       })
@@ -147,17 +132,16 @@ export default defineComponent({
         } else {
           this.$sftp.mkdir(path).exec({
             onSuccess: () => {
-              this.refNewFolderPrompt.setDisabled(false)
               this.refNewFolderPrompt.close()
             },
             onError: (msg) => {
-              this.refNewFolderPrompt.setDisabled(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
                 title: 'Failed to create folder',
                 content: msg
               })
-            }
+            },
+            onDone: () => this.refNewFolderPrompt.setDisabled(false)
           })
         }
       })
@@ -168,35 +152,37 @@ export default defineComponent({
       this.checkFileExists(path).then((exists) => {
         if (!exists) {
           this.refDeletePathPrompt.setLoading(false)
-          this.alertPathNotExists()
-        } else if (exists === FileInfoType.dir) {
-          this.$sftp.rmdir(path).exec({
-            onSuccess: () => {
-              this.refDeletePathPrompt.setLoading(false)
-              this.refDeletePathPrompt.close()
-            },
-            onError: (msg) => {
-              this.refDeletePathPrompt.setLoading(false)
-              this.$accessor.alerts.add({
-                type: AlertType.Error,
-                title: 'Failed to delete folder',
-                content: msg
-              })
-            }
+          this.refDeletePathPrompt.close()
+          this.$accessor.alerts.add({
+            type: AlertType.Error,
+            title: 'Path does not exists'
           })
         } else {
-          this.$sftp.delete(path).exec({
+          var cmd: SFTPAction
+          switch (exists) {
+            case FileInfoType.dir:
+              cmd = this.$sftp.rmdir(path)
+              break
+            case FileInfoType.file:
+              cmd = this.$sftp.delete(path)
+              break
+            case FileInfoType.link:
+              return
+          }
+          cmd.exec({
             onSuccess: () => {
-              this.refDeletePathPrompt.setLoading(false)
-              this.refDeletePathPrompt.close()
+              // TODO: remove node
             },
             onError: (msg) => {
-              this.refDeletePathPrompt.setLoading(false)
               this.$accessor.alerts.add({
                 type: AlertType.Error,
-                title: 'Failed to delete file',
+                title: 'Failed to delete path',
                 content: msg
               })
+            },
+            onDone: () => {
+              this.refDeletePathPrompt.setLoading(false)
+              this.refDeletePathPrompt.close()
             }
           })
         }
