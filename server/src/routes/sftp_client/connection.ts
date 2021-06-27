@@ -1,7 +1,7 @@
 import Client from 'ssh2-sftp-client'
 import * as utils from 'ssh2-sftp-client/src/utils'
 import { Router } from 'express'
-import store from '../../store/sftp_clients'
+import store from 'store/sftp_clients'
 
 const router = Router()
 

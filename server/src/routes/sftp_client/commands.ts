@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import Client from 'ssh2-sftp-client'
-import store from '../../store/sftp_clients'
+import store from 'store/sftp_clients'
 
 declare global {
   namespace Express {
