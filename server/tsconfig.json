@@ -6,9 +6,11 @@
     "target": "es6",
     "moduleResolution": "node",
     "sourceMap": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "strictNullChecks": true
   },
   "include": [
-    "src/**/*",
+    "src/**/*.ts",
+    "test/**/*.ts"
   ]
 }

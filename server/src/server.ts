@@ -1,22 +1,15 @@
-import express from 'express';
-import session from 'express-session'
+import fastify from 'fastify'
 
-const app = express();
-const PORT = 8000;
+const app = fastify()
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.post('/sftp_client', require('routes/sftp_client'))
 
-// TODO: store secret key in enviromental variable
-app.use(session({
-  secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: true,
-  // cookie: { secure: true }
-}))
+app.listen(8000, function (err, address) {
+  if (err) {
+    app.log.error(err)
+    process.exit(1)
+  }
+  app.log.info(`server listening on ${address}`)
+})
 
-app.use(require('./routes'))
-
-app.listen(PORT, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
-});
+export default app
