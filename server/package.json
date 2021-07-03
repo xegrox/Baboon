@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsnd --respawn -r tsconfig-paths/register src/server.ts -r dotenv/config",
-    "test": "SESSION_SECRET_KEY='secret' ts-mocha --timeout 15000 -r tsconfig-paths/register -r dotenv/config -r test/root-hook.ts test/**/*.test.ts --exit"
+    "test": "SESSION_SECRET_KEY='secret' ts-mocha --timeout 15000 -r tsconfig-paths/register -r dotenv/config -r test/fixtures.ts test/**/*.test.ts --exit"
   },
   "dependencies": {
     "@types/mocha": "^8.2.2",
