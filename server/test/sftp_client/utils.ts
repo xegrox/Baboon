@@ -36,7 +36,7 @@ export const testRpcRequestParams= async (method: string, params: Array<string>)
   }))
 }
 
-export async function sendRpcRequest(method: string, params: RpcParams, sessionId?: string)
+export async function sendRpcRequest(method: string, params?: RpcParams, sessionId?: string)
   : Promise<SuccessObject | NotificationObject | RequestObject | ErrorObject> {
 
   let res = await server.inject({
