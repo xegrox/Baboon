@@ -1,4 +1,5 @@
-import { Method, missingClientError } from '../interfaces'
+import { Method } from '../interfaces'
+import { missingClientError } from '../errors'
 import jsonrpc from 'jsonrpc-lite'
 
 const method: Method = {

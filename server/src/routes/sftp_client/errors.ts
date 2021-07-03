@@ -27,5 +27,5 @@ export const unknownError = (id: ID, message: string) => sftpRpcError(
 
 export const missingClientError = (id: ID) => sftpRpcError(
   id, errorCodes.noclient,
-  'Unauthorized, no sftp connection object found'
+  'Unauthorized, no sftp connection instance found'
 )
