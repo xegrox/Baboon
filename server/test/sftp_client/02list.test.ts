@@ -1,4 +1,4 @@
-import chai, { expect } from 'chai'
+import { expect } from 'chai'
 import { testRpcRequestParams, sendRpcRequest } from './utils'
 import { config, newConnection } from './hooks/global-hooks'
 import { listSetup, listCleanup } from './hooks/list-hooks'
@@ -9,8 +9,6 @@ let sessionId: string
 describe('COMMAND list', () => {
 
   before(async () => {
-    chai.use(require('chai-like'))
-    chai.use(require('chai-things'))
     await listSetup()
     sessionId = await newConnection()
   })
