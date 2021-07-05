@@ -10,6 +10,7 @@ const methods: {
   connect: require('./commands/connect'),
   list: require('./commands/list'),
   exists: require('./commands/exists'),
+  mkdir: require('./commands/mkdir'),
   disconnect: require('./commands/disconnect')
 }
 
