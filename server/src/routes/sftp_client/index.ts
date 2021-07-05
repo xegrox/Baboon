@@ -2,12 +2,21 @@ import store from 'store/clients'
 import jsonrpc, { RequestObject, JsonRpcError } from 'jsonrpc-lite'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { errorCodes, unknownError, sftpRpcError } from './errors'
-import commands from './commands'
+import { Method } from './interfaces'
+
+const methods: {
+  [key: string]: Method
+} = {
+  connect: require('./commands/connect'),
+  list: require('./commands/list'),
+  exists: require('./commands/exists'),
+  disconnect: require('./commands/disconnect')
+}
 
 module.exports = async (req: FastifyRequest, res: FastifyReply) => {
   let payload = jsonrpc.parseObject(req.body).payload
   if (payload instanceof RequestObject) {
-    let method = commands[payload.method]
+    let method = methods[payload.method]
 
     // Check method exists
     if (!method) {
@@ -29,7 +38,7 @@ module.exports = async (req: FastifyRequest, res: FastifyReply) => {
     const tokenType = 'Basic '
     if (token && token.startsWith(tokenType)) token = token.substring(tokenType.length, token.length)
     try {
-      res.send(await commands[payload.method].handler(
+      res.send(await method.handler(
         payload,
         token ? store.get(token) : undefined
       ))

@@ -12,4 +12,4 @@ const method: Method = {
   }
 }
 
-export default method
+module.exports = method
