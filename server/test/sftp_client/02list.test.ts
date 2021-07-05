@@ -13,7 +13,7 @@ describe('COMMAND list', () => {
     sessionId = await newConnection()
   })
 
-  after(() => listCleanup())
+  after(listCleanup)
 
   it('Should fail with missing params', () => testRpcRequestParams('list', ['path']))
 
