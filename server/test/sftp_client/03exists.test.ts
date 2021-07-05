@@ -15,9 +15,9 @@ describe('COMMAND exists', () => {
 
   after(existsCleanup)
 
-  it('Should fail with missing params', () => testRpcRequestParams('exists', ['path']))
+  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('exists', ['path']))
 
-  it('Should return filetype when dir exists', async () => {
+  it('When_DirExists_Should_ReturnSuccess-[String](\'d\')FileType', async () => {
     let payload = await sendRpcRequest('exists', { path: dirPath }, sessionId)
     expect(payload).to.be.instanceof(SuccessObject)
     payload = payload as SuccessObject
@@ -25,7 +25,7 @@ describe('COMMAND exists', () => {
     expect(payload.result).to.equal('d')
   })
 
-  it('Should return filetype when file exists', async () => {
+  it('When_FileExists_Should_ReturnSuccess_[String](\'-\')FileType', async () => {
     let payload = await sendRpcRequest('exists', { path: filePath }, sessionId)
     expect(payload).to.be.instanceof(SuccessObject)
     payload = payload as SuccessObject
@@ -33,7 +33,7 @@ describe('COMMAND exists', () => {
     expect(payload.result).to.equal('-')
   })
 
-  it('Should return false when path not exists', async () => {
+  it('When_PathNotExists_Should_ReturnSuccess_[Bool](false)FileNotExists', async () => {
     let payload = await sendRpcRequest('exists', { path: `${config.remoteUrl}/not-exists-path`}, sessionId)
     expect(payload).to.be.instanceof(SuccessObject)
     payload = payload as SuccessObject

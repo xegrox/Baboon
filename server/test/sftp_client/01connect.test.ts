@@ -4,9 +4,9 @@ import { SuccessObject, ErrorObject } from 'jsonrpc-lite'
 
 describe('COMMAND connect', () => {
 
-  it('Should fail with missing params', () => testRpcRequestParams('connect', ['host', 'port', 'username', 'password']))
+  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('connect', ['host', 'port', 'username', 'password']))
 
-  it('Should succeed with valid credentials', async () => {
+  it('When_ValidCredentials_Should_ReturnSuccess_[String]SessionID', async () => {
     let payload = await sendRpcRequest('connect', {
       host: 'localhost',
       port: 22,
@@ -21,7 +21,7 @@ describe('COMMAND connect', () => {
     expect(buffer.toString('hex')).to.have.length(64)
   })
 
-  it('Should fail with invalid credentials', async () => {
+  it('When_InvalidCredentials_Should_ReturnError_[-32000, ERR_GENERIC_CLIENT]ConnectionError', async () => {
     let payload = await sendRpcRequest('connect', {
       host: 'localhost',
       port: 22,

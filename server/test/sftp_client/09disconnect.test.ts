@@ -11,12 +11,12 @@ describe('COMMAND disconnect', () => {
     sessionId = await newConnection()
   })
 
-  it('Should succeed with existing connection', async () => {
+  it('When_HaveConnection_Should_ReturnSuccess_[void]Disconnected', async () => {
     let payload = await sendRpcRequest('disconnect', [], sessionId)
     expect(payload).to.be.instanceOf(SuccessObject)
   })
 
-  it('Should fail with no connection', async () => {
+  it('When_NoConnection_Should_ReturnError_[-32000, ERR_NOT_CONNECTED]NotConnected', async () => {
     let payload = await sendRpcRequest('disconnect', [], sessionId)
     expect(payload).to.be.instanceOf(ErrorObject)
     payload = payload as ErrorObject
