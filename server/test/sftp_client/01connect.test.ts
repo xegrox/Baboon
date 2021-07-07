@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import { config } from './hooks/global-hooks'
 import { sftpErrorCode, rpcErrorCode, sendRpcRequest, testRpcRequestParams } from './utils'
 import { SuccessObject, ErrorObject } from 'jsonrpc-lite'
 
@@ -7,12 +8,7 @@ describe('COMMAND connect', () => {
   it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('connect', ['host', 'port', 'username', 'password']))
 
   it('When_ValidCredentials_Should_ReturnSuccess_[String]SessionID', async () => {
-    let payload = await sendRpcRequest('connect', {
-      host: 'localhost',
-      port: 22,
-      username: 'sftp_user',
-      password: 'sftp22fed'
-    })
+    let payload = await sendRpcRequest('connect', config)
     expect(payload).to.be.instanceOf(SuccessObject)
     payload = payload as SuccessObject
     expect(payload.result).to.be.a('string')
@@ -23,10 +19,8 @@ describe('COMMAND connect', () => {
 
   it('When_InvalidCredentials_Should_ReturnError_[-32000, ERR_GENERIC_CLIENT]ConnectionError', async () => {
     let payload = await sendRpcRequest('connect', {
-      host: 'localhost',
-      port: 22,
-      username: 'sftp_user',
-      password: 'invalid'
+      ...config,
+      password: config.password + '_invalid'
     })
     expect(payload).to.be.instanceOf(ErrorObject)
     payload = payload as ErrorObject
