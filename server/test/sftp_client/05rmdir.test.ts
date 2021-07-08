@@ -13,7 +13,7 @@ describe('COMMAND rmdir', () => {
     rmdirSetup()
   })
 
-  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('rmdir', ['path']))
+  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('rmdir', { path: String }))
 
   it('When_ValidPath_Should_ReturnSuccess_[null]FolderRemovedRecursively', async () => {
     let payload = await sendRpcRequest('rmdir', { path: `${config.remoteUrl}/rmdir-directory` }, sessionId)

@@ -1,8 +1,8 @@
 import store from 'store/clients'
-import jsonrpc, { RequestObject, JsonRpcError } from 'jsonrpc-lite'
+import jsonrpc, { RequestObject, JsonRpcError, Defined } from 'jsonrpc-lite'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { errorCodes, unknownError, sftpRpcError } from './errors'
-import { Method } from './interfaces'
+import Method from './method'
 
 const methods: {
   [key: string]: Method
@@ -20,29 +20,48 @@ module.exports = async (req: FastifyRequest, res: FastifyReply) => {
   if (payload instanceof RequestObject) {
     let method = methods[payload.method]
 
-    // Check method exists
+    // Ensure method exists
     if (!method) {
       res.send(jsonrpc.error(payload.id, JsonRpcError.methodNotFound(`Method '${payload.method}' does not exists`)))
       return
     }
 
-    // Check param exists
-    for (let param of method.requiredParams ?? []) {
-      if (!payload.params?.[param]) {
-        let err = JsonRpcError.invalidParams(`Missing param '${param}'`)
+    // Ensure params are in object format
+    let parsedParams: { [key: string]: any } | Defined[] | undefined = payload.params
+    if (parsedParams instanceof Array) {
+      res.send(jsonrpc.error(payload.id, JsonRpcError.invalidParams('Params must be an object')))
+      return
+    }
+
+    // Validate required params
+    let requiredPTypes = method.opts.params
+    for (let requiredPName in requiredPTypes) {
+      let parsedPValue = parsedParams?.[requiredPName]
+      let requiredPType = requiredPTypes[requiredPName]
+
+      // Check if required param exists
+      if (parsedPValue === undefined) {
+        res.send(jsonrpc.error(payload.id, JsonRpcError.invalidParams(`Missing param '${requiredPName}'`)))
+        return
+      }
+
+      // Check param has required type
+      if (typeof parsedPValue !== typeof requiredPType()) {
+        let err = JsonRpcError.invalidParams(`Param '${requiredPName}' must be of type ${typeof requiredPType()}`)
         res.send(jsonrpc.error(payload.id, err))
         return
       }
     }
 
-    // Parse header authorization string
-    let token = req.headers.authorization
+    // Parse req authorization header containing sessionId
+    let sessionId = req.headers.authorization
     const tokenType = 'Basic '
-    if (token && token.startsWith(tokenType)) token = token.substring(tokenType.length, token.length)
+    if (sessionId && sessionId.startsWith(tokenType)) sessionId = sessionId.substring(tokenType.length, sessionId.length)
     try {
-      res.send(await method.handler(
-        payload,
-        token ? store.get(token) : undefined
+      res.send(await method.exec(
+        payload.id,
+        parsedParams,
+        sessionId ? store.get(sessionId) : undefined
       ))
     } catch (e) {
       let err: NodeJS.ErrnoException = (e instanceof Error) ? e : Error(e)

@@ -15,7 +15,7 @@ describe('COMMAND list', () => {
 
   after(listCleanup)
 
-  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('list', ['path']))
+  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('list', { path: String }))
 
   it('When_ValidPath_Should_ReturnSuccess_[Array<{mtime, name, type}>]FileInfoList', async () => {
     let payload = await sendRpcRequest('list', { path: config.remoteUrl }, sessionId)

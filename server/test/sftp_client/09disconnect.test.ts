@@ -12,7 +12,7 @@ describe('COMMAND disconnect', () => {
   })
 
   it('When_HaveConnection_Should_ReturnSuccess_[null]Disconnected', async () => {
-    let payload = await sendRpcRequest('disconnect', [], sessionId)
+    let payload = await sendRpcRequest('disconnect', undefined, sessionId)
     expect(payload).to.be.instanceOf(SuccessObject)
   })
 

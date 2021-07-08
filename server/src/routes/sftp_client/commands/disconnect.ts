@@ -1,12 +1,12 @@
-import { Method } from '../interfaces'
+import Method from '../method'
 import { missingClientError } from '../errors'
 import jsonRpc from 'jsonrpc-lite'
 
-const method: Method = {
-  handler(payload, sftp) {
-    if (!sftp) return missingClientError(payload.id)
-    return sftp.end().then(() => jsonRpc.success(payload.id, null))
+const method = new Method({
+  handler(id, sftp) {
+    if (!sftp) return missingClientError(id)
+    return sftp.end().then(() => jsonRpc.success(id, null))
   }
-}
+})
 
 module.exports = method

@@ -6,8 +6,7 @@ import jsonrpc, {
   NotificationObject,
   RequestObject,
   ErrorObject,
-  JsonRpcError,
-  RpcParams
+  JsonRpcError
 } from 'jsonrpc-lite'
 
 export const rpcErrorCode = {
@@ -26,17 +25,24 @@ export const sftpErrorCode = {
   unknown: 'ERR_UNKNOWN'
 }
 
-export const testRpcRequestParams= async (method: string, params: Array<string>) => {
-  let paramsObj = params.reduce((acc,curr)=> (acc[curr]='',acc),{})
-  return Promise.all(params.map((p) => async () => {
-    let payload = await sendRpcRequest(method, { ...paramsObj, [p]: undefined })
-    expect(payload).to.be.instanceof(ErrorObject)
-    payload = payload as ErrorObject
-    expect(payload.error.code).to.equal(rpcErrorCode.params)
-  }))
+// TODO: mock command handler and verify param has correct type
+export const testRpcRequestParams = async (method: string, params: { [key: string]: () => any }) => {
+  let promises = Array<Promise<void>>()
+  let definedParams = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, v()]))
+  for (let p in definedParams) {
+    promises.push(new Promise(async (resolve, reject) => {
+      let payload = await sendRpcRequest(method, { ...definedParams, [p]: undefined })
+      if (!(payload instanceof ErrorObject)) reject(Error(`Method passed without required param '${p}'`))
+      else if (payload.error.code !== rpcErrorCode.params) {
+        reject(Error(`Unexpected error with code '${payload.error.code}' received while testing method params`))
+      }
+      resolve()
+    }))
+  }
+  return Promise.all(promises)
 }
 
-export async function sendRpcRequest(method: string, params?: RpcParams, sessionId?: string)
+export async function sendRpcRequest(method: string, params?: object, sessionId?: string)
   : Promise<SuccessObject | NotificationObject | RequestObject | ErrorObject> {
 
   let res = await server.inject({
@@ -48,7 +54,7 @@ export async function sendRpcRequest(method: string, params?: RpcParams, session
   let parsed = jsonrpc.parseJsonRpcString(res.body)
   if (parsed instanceof Array) throw Error('Obtained multiple response objects')
   let payload = parsed.payload
-  if (payload instanceof JsonRpcError) throw Error(`Invalid rpc format: ${JSON.stringify(payload)}`)
+  if (payload instanceof JsonRpcError) throw Error(`Invalid rpc format: ${JSON.stringify(res.body)}`)
   if (payload instanceof ErrorObject) {
     // Ensure all sftp errors have data with properties code and message
     if (payload.error.code === rpcErrorCode.sftp) {

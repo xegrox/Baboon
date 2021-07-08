@@ -1,15 +1,15 @@
-import { Method } from '../interfaces'
+import Method from '../method'
 import { missingClientError  } from '../errors'
 import jsonrpc from 'jsonrpc-lite'
 
-const method: Method = {
-  requiredParams: ['path'],
-  async handler(payload, sftp) {
-    if (!sftp) return missingClientError(payload.id)
-    return sftp.exists((payload.params as any).path).then((exists) => {
-      return jsonrpc.success(payload.id, exists)
+const method = new Method({
+  params: { path: String },
+  async handler(id, sftp) {
+    if (!sftp) return missingClientError(id)
+    return sftp.exists(this.path).then((exists) => {
+      return jsonrpc.success(id, exists)
     })
   }
-}
+})
 
 module.exports = method

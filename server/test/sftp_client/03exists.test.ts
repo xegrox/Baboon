@@ -15,7 +15,7 @@ describe('COMMAND exists', () => {
 
   after(existsCleanup)
 
-  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('exists', ['path']))
+  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('exists', { path: String }))
 
   it('When_DirExists_Should_ReturnSuccess-[String](\'d\')FileType', async () => {
     let payload = await sendRpcRequest('exists', { path: dirPath }, sessionId)
