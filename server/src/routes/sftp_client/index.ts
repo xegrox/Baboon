@@ -8,10 +8,14 @@ const methods: {
   [key: string]: Method
 } = {
   connect: require('./commands/connect'),
-  list: require('./commands/list'),
   exists: require('./commands/exists'),
+  stat: require('./commands/stat'),
+  list: require('./commands/list'),
   mkdir: require('./commands/mkdir'),
   rmdir: require('./commands/rmdir'),
+  read: require('./commands/read'),
+  write: require('./commands/write'),
+  delete: require('./commands/delete'),
   disconnect: require('./commands/disconnect')
 }
 
