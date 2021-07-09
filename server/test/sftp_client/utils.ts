@@ -45,12 +45,13 @@ export const testRpcRequestParams = async (method: string, params: { [key: strin
     promises.push(new Promise(async (resolve, reject) => {
       let payload = await sendRpcRequest(method, { ...definedParams, [p]: undefined })
       if (!(payload instanceof ErrorObject)) reject(Error(`Param '${p}' is not required: Method passed without the param`))
+      else if (payload.error.code !== rpcErrorCode.params) reject(Error(`Unexpected error while testing params: ${JSON.stringify(payload.error)}`))
       resolve()
     }))
   }
 
+  await Promise.all(promises)
   sinon.restore()
-  return Promise.all(promises)
 }
 
 export async function sendRpcRequest(method: string, params?: object, sessionId?: string)
