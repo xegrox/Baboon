@@ -7,7 +7,7 @@ export const errorCodes = {
   permission: 'EACCES',
   notexist: 'ENOENT',
   notdir: 'ENOTDIR',
-  noclient: 'ERR_MISSING_CLIENT',
+  nosession: 'ERR_MISSING_SESSION',
   unknown: 'ERR_UNKNOWN'
 }
 
@@ -25,7 +25,7 @@ export const unknownError = (id: ID, message: string) => sftpRpcError(
   'Unknown error encountered: ' + message
 )
 
-export const missingClientError = (id: ID) => sftpRpcError(
-  id, errorCodes.noclient,
-  'Unauthorized, no sftp connection instance found'
+export const missingSessionError = (id: ID) => sftpRpcError(
+  id, errorCodes.nosession,
+  'Unauthorized, no sftp session found'
 )

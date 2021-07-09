@@ -4,22 +4,33 @@ import {
   ErrorObject
 } from 'jsonrpc-lite'
 import Client from 'ssh2-sftp-client'
+import { missingSessionError } from './errors'
 
 type ResponseObjects = SuccessObject | ErrorObject
 
 interface MethodParams { [key: string]: any }
 
-type MethodHandler = (id: ID, sftp?: Client) => ResponseObjects | Promise<ResponseObjects>
+type MethodReturn = ResponseObjects | Promise<ResponseObjects>
+
 
 export default class Method<P extends MethodParams = MethodParams> {
-  constructor(public opts: {
+  constructor(public opts: ({
     params?: P,
-    handler: MethodHandler
-  } & ThisType<ExtractParamType<P>>) {}
+    requireConnection?: false
+    handler(id: ID): MethodReturn,
+  } | {
+    params?: P,
+    requireConnection: true,
+    handler(id: ID, sftp: Client): MethodReturn
+  }) & ThisType<ExtractParamType<P>>) {}
 
-  async exec(id: ID, params?: ExtractParamType<P>, sftp?: Client) {
-    // Merge params into handler context
-    return await ({...this.opts, ...(params ?? {})}).handler(id, sftp)
+  async exec(id: ID, params?: ExtractParamType<P>, sftp?: Client): Promise<ResponseObjects> {
+    if (!this.opts.requireConnection) {
+      return this.opts.handler.call(params, id)
+    } else {
+      if (!sftp) return missingSessionError(id)
+      return this.opts.handler.call(params, id, sftp)
+    }
   }
 }
 

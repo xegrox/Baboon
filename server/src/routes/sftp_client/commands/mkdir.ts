@@ -1,11 +1,10 @@
 import Method from '../method'
-import { missingClientError } from '../errors'
 import jsonrpc from 'jsonrpc-lite'
 
 const method = new Method({
+  requireConnection: true,
   params: { path: String },
-  handler(id, sftp) {
-    if (!sftp) return missingClientError(id)
+  async handler(id, sftp) {
     return sftp.mkdir(this.path, true).then(() => jsonrpc.success(id, null))
   }
 })
