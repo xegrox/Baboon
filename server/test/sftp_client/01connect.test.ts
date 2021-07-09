@@ -5,7 +5,7 @@ import { SuccessObject, ErrorObject } from 'jsonrpc-lite'
 
 describe('COMMAND connect', () => {
 
-  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('connect', {
+  it('When_RequiredParamsPassed_Should_NotThrowError', () => testRpcRequestParams('connect', {
     host: String,
     port: Number,
     username: String,

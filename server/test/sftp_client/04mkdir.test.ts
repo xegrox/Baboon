@@ -14,7 +14,7 @@ describe('COMMAND mkdir', () => {
 
   after(mkdirCleanup)
 
-  it('When_MissingParams_Should_ReturnError_[-32602]InvalidParams', () => testRpcRequestParams('mkdir', { path: String}))
+  it('When_RequiredParamsPassed_Should_NotThrowError', () => testRpcRequestParams('mkdir', { path: String}))
 
   it('When_ValidPath_Should_ReturnSuccess_[null]FolderCreatedRecursively', async () => {
     let payload = await sendRpcRequest('mkdir', { path: `${config.remoteUrl}/mkdir-directory/directory` }, sessionId)
