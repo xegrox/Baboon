@@ -9,8 +9,8 @@ let sessionId: string
 describe('COMMAND rmdir', () => {
 
   before(async () =>  {
+    await rmdirSetup()
     sessionId = await newConnection()
-    rmdirSetup()
   })
 
   it('When_RequiredParamsPassed_Should_NotThrowError', () => testRpcRequestParams('rmdir', { path: String }))
