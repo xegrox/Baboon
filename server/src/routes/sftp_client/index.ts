@@ -16,7 +16,8 @@ const methods: {
   read: require('./commands/read'),
   write: require('./commands/write'),
   delete: require('./commands/delete'),
-  disconnect: require('./commands/disconnect')
+  disconnect: require('./commands/disconnect'),
+  ping: require('./commands/ping')
 }
 
 module.exports = async (req: FastifyRequest, reply: FastifyReply) => {
