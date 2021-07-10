@@ -19,21 +19,21 @@ const methods: {
   disconnect: require('./commands/disconnect')
 }
 
-module.exports = async (req: FastifyRequest, res: FastifyReply) => {
+module.exports = async (req: FastifyRequest, reply: FastifyReply) => {
   let payload = jsonrpc.parseObject(req.body).payload
   if (payload instanceof RequestObject) {
     let method = methods[payload.method]
 
     // Ensure method exists
     if (!method) {
-      res.send(jsonrpc.error(payload.id, JsonRpcError.methodNotFound(`Method '${payload.method}' does not exists`)))
+      reply.send(jsonrpc.error(payload.id, JsonRpcError.methodNotFound(`Method '${payload.method}' does not exists`)))
       return
     }
 
     // Ensure params are in object format
     let parsedParams: { [key: string]: any } | Defined[] | undefined = payload.params
     if (parsedParams instanceof Array) {
-      res.send(jsonrpc.error(payload.id, JsonRpcError.invalidParams('Params must be an object')))
+      reply.send(jsonrpc.error(payload.id, JsonRpcError.invalidParams('Params must be an object')))
       return
     }
 
@@ -45,14 +45,14 @@ module.exports = async (req: FastifyRequest, res: FastifyReply) => {
 
       // Check if required param exists
       if (parsedPValue === undefined) {
-        res.send(jsonrpc.error(payload.id, JsonRpcError.invalidParams(`Missing param '${requiredPName}'`)))
+        reply.send(jsonrpc.error(payload.id, JsonRpcError.invalidParams(`Missing param '${requiredPName}'`)))
         return
       }
 
       // Check param has required type
       if (typeof parsedPValue !== typeof requiredPType()) {
         let err = JsonRpcError.invalidParams(`Param '${requiredPName}' must be of type ${typeof requiredPType()}`)
-        res.send(jsonrpc.error(payload.id, err))
+        reply.send(jsonrpc.error(payload.id, err))
         return
       }
     }
@@ -62,15 +62,12 @@ module.exports = async (req: FastifyRequest, res: FastifyReply) => {
     const tokenType = 'Basic '
     if (sessionId && sessionId.startsWith(tokenType)) sessionId = sessionId.substring(tokenType.length, sessionId.length)
     try {
-      res.send(await method.exec(
-        payload.id,
-        parsedParams,
-        sessionId ? store.get(sessionId) : undefined
-      ))
+      let res = await method.exec(payload.id, parsedParams, sessionId)
+      reply.send(res)
     } catch (e) {
       let err: NodeJS.ErrnoException = (e instanceof Error) ? e : Error(e)
       err.message ??= 'No message provided'
-      res.send(
+      reply.send(
         err.code && Object.values(errorCodes).indexOf(err.code) > -1
         ? sftpRpcError(payload.id, err.code, err.message)
         : unknownError(payload.id, err.message)
