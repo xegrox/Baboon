@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/server.ts",
-    "dev": "tsnd --respawn -r tsconfig-paths/register src/server.ts -r dotenv/config",
+    "dev": "SESSION_SECRET_KEY='secret' tsnd --respawn -r tsconfig-paths/register src/server.ts -r dotenv/config",
     "test": "SESSION_SECRET_KEY='secret' ts-mocha --timeout 15000 -r tsconfig-paths/register -r dotenv/config -r test/fixtures.ts test/**/*.test.ts --exit"
   },
   "dependencies": {
