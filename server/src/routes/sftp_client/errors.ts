@@ -1,6 +1,8 @@
 import jsonrpc, { ID, JsonRpcError } from 'jsonrpc-lite'
 
 export const errorCodes = {
+  notfound: 'ENOTFOUND',
+  connrefused: 'ECONNREFUSED',
   generic: 'ERR_GENERIC_CLIENT',
   connect: 'ERR_NOT_CONNECTED',
   badPath: 'ERR_BAD_PATH',
