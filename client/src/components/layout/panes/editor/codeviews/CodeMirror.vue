@@ -4,7 +4,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { AlertType } from 'types/AlertItem.interface'
 import { EditorView, keymap, highlightActiveLine } from '@codemirror/view'
 import { EditorState, Text } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/gutter'
@@ -40,74 +39,54 @@ export default defineComponent({
     },
     writeFile(content: string) {
       this.$emit('saving', true)
-      this.$sftp.write(this.path, content).exec({
-        onSuccess: () => {
-          this.initialDoc = this.view.state.doc
-          this.$emit('modified', false)
-          this.$emit('saving', false)
-        },
-        onError: (msg) => {
-          this.$accessor.alerts.add({
-            type: AlertType.Error,
-            title: 'Failed to write file',
-            content: msg
-          })
-          this.$emit('saving', false)
-        }
-      })
+      this.$sftp.write(this.path, content).then(() => {
+        this.initialDoc = this.view.state.doc
+        this.$emit('modified', false)
+      }).catch(() => {}).finally(() => this.$emit('saving', false))
     }
   },
   mounted() {
-    this.$sftp.read(this.path).exec({
-      onSuccess: (data: string) => {
-        var view = new EditorView({
-          parent: this.$refs.editor as HTMLElement,
-          state: EditorState.create({
-            doc: data,
-            extensions: [
-              EditorView.updateListener.of((v) => {
-                if (v.docChanged) {
-                  clearTimeout(this.dbModTimerId)
-                  this.dbModTimerId = setTimeout(() => this.$emit('modified', !this.compareDocEq(v.state.doc)), 500)
-                }
-              }),
-              lineNumbers(),
-              highlightActiveLineGutter(),
-              highlightActiveLine(),
-              history(),
-              closeBrackets(),
-              indentOnInput(),
-              keymap.of([
-                defaultTabBinding,
-                ...historyKeymap,
-                ...closeBracketsKeymap
-              ]),
-              keymap.of([{
-                key: 'c-s',
-                run: (v) => {
-                  clearTimeout(this.dbModTimerId)
-                  this.dbSvTimerId = setTimeout(() => this.writeFile(v.state.doc.toString()), 500)
-                  return true
-                }
-              }]),
-              theme,
-              javascript({
-                typescript: true
-              })
-            ]
-          })
+    this.$sftp.read(this.path).then((content) => {
+      var view = new EditorView({
+        parent: this.$refs.editor as HTMLElement,
+        state: EditorState.create({
+          doc: content,
+          extensions: [
+            EditorView.updateListener.of((v) => {
+              if (v.docChanged) {
+                clearTimeout(this.dbModTimerId)
+                this.dbModTimerId = setTimeout(() => this.$emit('modified', !this.compareDocEq(v.state.doc)), 500)
+              }
+            }),
+            lineNumbers(),
+            highlightActiveLineGutter(),
+            highlightActiveLine(),
+            history(),
+            closeBrackets(),
+            indentOnInput(),
+            keymap.of([
+              defaultTabBinding,
+              ...historyKeymap,
+              ...closeBracketsKeymap
+            ]),
+            keymap.of([{
+              key: 'c-s',
+              run: (v) => {
+                clearTimeout(this.dbModTimerId)
+                this.dbSvTimerId = setTimeout(() => this.writeFile(v.state.doc.toString()), 500)
+                return true
+              }
+            }]),
+            theme,
+            javascript({
+              typescript: true
+            })
+          ]
         })
-        this.initialDoc = view.state.doc
-        this.view = view
-      },
-      onError: (msg) => {
-        this.$accessor.alerts.add({
-          type: AlertType.Error,
-          title: 'Failed to read file',
-          content: msg
-        })
-      }
-    });
+      })
+      this.initialDoc = view.state.doc
+      this.view = view
+    }).catch(() => {})
   },
 })
 </script>

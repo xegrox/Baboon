@@ -28,6 +28,7 @@ import AlertCenter from 'components/layout/AlertCenter.vue'
 import FadeTransition from 'components/ui/transitions/Fade.vue'
 import { AlertType } from 'types/AlertItem.interface'
 import { ProjectItem } from 'types/ProjectItem.class'
+import { Pong } from 'api/sftp'
 
 export default defineComponent({
   name: 'Baboon',
@@ -61,23 +62,20 @@ export default defineComponent({
     }
   },
   beforeCreate() {
-    this.$sftp.ping().exec({
-      onSuccess: (data) => {
-        if (data.hasConnection) {
+    this.$sftp.ping().then((data) => {
+      switch(data) {
+        case Pong.connected:
           this.$accessor.sftp.setConnected(true)
-        } else {
-         if (data.hasClient) {
-           this.$accessor.alerts.add({
-             type: AlertType.Error,
-             title: 'SFTP connection lost'
-           })
-           this.$sftp.disconnect().exec()
-         }
-       }
-       this.pinging = false
-      },
-      onError: () => {}
-    })
+          break
+        case Pong.disconnected:
+          this.$accessor.alert.add({
+            type: AlertType.Error,
+            title: 'SFTP connection lost'
+          })
+          this.$sftp.disconnect()
+      }
+      this.pinging = false
+    }).catch(() => {})
   }
 })
 </script>

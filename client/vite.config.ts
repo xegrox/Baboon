@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [vue(), tsconfigPaths({ loose: true })],
   server: {
     proxy: {
-      '^/sftp_client/*.': 'http://localhost:8000'
+      '^/sftp_client$': 'http://localhost:8000'
     }
   }
 })

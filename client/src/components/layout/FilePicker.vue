@@ -71,26 +71,22 @@ export default defineComponent({
     checkPath() {
       this.loading = true
       var path = p.normalize(this.path)
-      this.$sftp.exists(path).exec({
-        onSuccess: (data) => {
-          if (!data) {
-            this.alertError('Path does not exists')
+      this.$sftp.exists(path).then((exists) => {
+        if (!exists) {
+          this.alertError('Path does not exists')
+          return
+        } else {
+          if (this.pickFolder && !this.pickFile && exists !== FileInfoType.dir) {
+            this.alertError('Path does not lead to a folder')
             return
-          } else {
-            if (this.pickFolder && !this.pickFile && data !== FileInfoType.dir) {
-              this.alertError('Path does not lead to a folder')
-              return
-            } else if (this.pickFile && !this.pickFolder && data !== FileInfoType.file) {
-              this.alertError('Path does not lead to a file')
-              return
-            }
-            (this.$refs.model as any).close()
-            this.$emit('done', path)
+          } else if (this.pickFile && !this.pickFolder && exists !== FileInfoType.file) {
+            this.alertError('Path does not lead to a file')
+            return
           }
-        },
-        onError: (msg) => this.alertError('Error checking if path exists', msg)
-      })
-      this.loading = false
+          (this.$refs.model as any).close()
+          this.$emit('done', path)
+        }
+      }).catch(() => {}).finally(() => this.loading = false)
     }
   }
 })

@@ -17,7 +17,6 @@
 import { defineComponent, PropType } from 'vue'
 import { FileInfoType } from 'api/sftp'
 import { TreeNode, TreeBranch, TreeLeaf } from 'types/TreeNode.class'
-import { AlertType } from 'types/AlertItem.interface'
 import { FileIcon, FolderIcon, ChevronDownIcon } from '@zhuowenli/vue-feather-icons'
 import TransitionExpand from 'components/ui/transitions/Expand.vue'
 import p from 'path-browserify'
@@ -93,10 +92,12 @@ export default defineComponent({
       this.$emit('clickNode', this.item, event)
       if (this.item instanceof TreeBranch) this.toggleBranch(this.item)
     },
-    async listBranch(branch: TreeBranch) {
-      return await this.$sftp.list(branch.path).exec<Array<TreeNode> | undefined>({
-        onSuccess: (data) => {
-          return data.flatMap<TreeNode>((f) => {
+    async listBranch(branch: TreeBranch): Promise<Array<TreeNode> | void> {
+      return await this.$sftp.list(branch.path).then((list) => {
+        return list.sort((a, b) => {
+            if (a.type === b.type) return a.name.localeCompare(b.name)
+            return a.type === FileInfoType.dir ? -1 : 1
+          }).flatMap<TreeNode>((f) => {
             var path = p.join(branch.path, f.name)
             switch (f.type) {
               case FileInfoType.dir:
@@ -107,16 +108,7 @@ export default defineComponent({
                 return []
             }
           })
-        },
-        onError: (msg) => {
-          this.$accessor.alerts.add({
-            type: AlertType.Error,
-            title: 'Failed get contents of folder',
-            content: msg
-          })
-          return undefined
-        }
-      })
+      }).catch(() => {})
     }
   }
 })

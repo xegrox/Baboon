@@ -21,7 +21,7 @@ import ContextMenuItem from 'components/ui/ContextMenuItem.vue'
 import InputPrompt from 'components/ui/InputPrompt.vue'
 import ActionDialog from 'components/ui/ActionDialog.vue'
 import { AlertType } from 'types/AlertItem.interface'
-import { SFTPAction, FileInfoType } from 'api/sftp'
+import { FileInfoType } from 'api/sftp'
 import p from 'path-browserify'
 
 export default defineComponent({
@@ -85,91 +85,55 @@ export default defineComponent({
       ref.open()
     },
 
-    async checkFileExists(path: string) {
-      return await this.$sftp.exists(path).exec<false | FileInfoType | undefined>({
-        onSuccess: (exists) => {
-          return exists
-        },
-        onError: (msg) => {
-          this.$accessor.alerts.add({
-            type: AlertType.Error,
-            title: 'Unable to check if file exists',
-            content: msg
-          })
-          return undefined
-        }
-      })
-    },
-
     createNewFile(path: string) {
       this.refNewFilePrompt.setDisabled(true)
-      this.checkFileExists(path).then((exists) => {
+      this.$sftp.exists(path).then((exists) => {
         if (exists) {
           this.refNewFilePrompt.setDisabled(false)
           this.refNewFilePrompt.setError('Path with same name already exists')
         } else {
-          this.$sftp.write(path, '').exec({
-            onSuccess: () => {
-              var parentNode = this.getNodeBranch(this.activeNode)
-              if (parentNode.expanded) {
-                var leaf = new TreeLeaf(path, parentNode)
-                var insertIndex = parentNode.children.findIndex((n) =>
-                  n instanceof TreeLeaf && leaf.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
-                )
-                if (insertIndex === -1) insertIndex = parentNode.children.length
-                parentNode.children.splice(insertIndex, 0, leaf)
-              }
-              this.refNewFilePrompt.close()
-            },
-            onError: (msg) => {
-              this.$accessor.alerts.add({
-                type: AlertType.Error,
-                title: 'Failed to create new file',
-                content: msg
-              })
-            },
-            onDone: () => this.refNewFilePrompt.setDisabled(false)
-          })
+          this.$sftp.write(path, '').then(() => {
+            var parentNode = this.getNodeBranch(this.activeNode)
+            if (parentNode.expanded) {
+              var leaf = new TreeLeaf(path, parentNode)
+              var insertIndex = parentNode.children.findIndex((n) =>
+                n instanceof TreeLeaf && leaf.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
+              )
+              if (insertIndex === -1) insertIndex = parentNode.children.length
+              parentNode.children.splice(insertIndex, 0, leaf)
+            }
+            this.refNewFilePrompt.close()
+          }).catch(() => {})
         }
-      })
+      }).catch(() => {}).finally(() => this.refNewFilePrompt.setDisabled(false))
     },
 
     createNewFolder(path: string) {
       this.refNewFolderPrompt.setDisabled(true)
-      this.checkFileExists(path).then((exists) => {
+      this.$sftp.exists(path).then((exists) => {
         if (exists) {
           this.refNewFolderPrompt.setDisabled(false)
           this.refNewFolderPrompt.setError('Path with same name already exists')
         } else {
-          this.$sftp.mkdir(path).exec({
-            onSuccess: () => {
-              var parentNode = this.getNodeBranch(this.activeNode)
-              if (parentNode.expanded) {
-                var branch = new TreeBranch(path, parentNode)
-                var insertIndex = parentNode.children.findIndex((n) =>
-                  n instanceof TreeLeaf || branch.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
-                )
-                if (insertIndex === -1) insertIndex = 0
-                parentNode.children.splice(insertIndex, 0, branch)
-              }
-              this.refNewFolderPrompt.close()
-            },
-            onError: (msg) => {
-              this.$accessor.alerts.add({
-                type: AlertType.Error,
-                title: 'Failed to create folder',
-                content: msg
-              })
-            },
-            onDone: () => this.refNewFolderPrompt.setDisabled(false)
-          })
+          this.$sftp.mkdir(path).then(() => {
+            var parentNode = this.getNodeBranch(this.activeNode)
+            if (parentNode.expanded) {
+              var branch = new TreeBranch(path, parentNode)
+              var insertIndex = parentNode.children.findIndex((n) =>
+                n instanceof TreeLeaf || branch.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
+              )
+              if (insertIndex === -1) insertIndex = 0
+              parentNode.children.splice(insertIndex, 0, branch)
+            }
+            this.refNewFolderPrompt.close()
+          }).catch(() => {}).finally(() => this.refNewFolderPrompt.setDisabled(false))
         }
-      })
+      }).catch(() => {})
     },
 
     deletePath(path: string) {
       this.refDeletePathPrompt.setLoading(true)
-      this.checkFileExists(path).then((exists) => {
+      this.$sftp.exists(path).then((exists) => {
         if (!exists) {
           this.refDeletePathPrompt.setLoading(false)
           this.refDeletePathPrompt.close()
@@ -178,37 +142,27 @@ export default defineComponent({
             title: 'Path does not exists'
           })
         } else {
-          var cmd: SFTPAction
+          var cmd: (path: string) => Promise<null>
           switch (exists) {
             case FileInfoType.dir:
-              cmd = this.$sftp.rmdir(path)
+              cmd = this.$sftp.rmdir
               break
             case FileInfoType.file:
-              cmd = this.$sftp.delete(path)
+              cmd = this.$sftp.delete
               break
             case FileInfoType.link:
+              // TODO: support link delete
               return
           }
-          cmd.exec({
-            onSuccess: () => {
-              var parentChildren = this.activeNode.parent?.children
-              parentChildren?.splice(parentChildren.findIndex((n) => n.path === path), 1)
-            },
-            onError: (msg) => {
-              // TODO: refresh tree
-              this.$accessor.alerts.add({
-                type: AlertType.Error,
-                title: 'Failed to delete path',
-                content: msg
-              })
-            },
-            onDone: () => {
-              this.refDeletePathPrompt.setLoading(false)
-              this.refDeletePathPrompt.close()
-            }
+          cmd(path).then(() => {
+            var parentChildren = this.activeNode.parent?.children
+            parentChildren?.splice(parentChildren.findIndex((n) => n.path === path), 1)
+          }).catch(() => {}).finally(() => {
+            this.refDeletePathPrompt.setLoading(false)
+            this.refDeletePathPrompt.close()
           })
         }
-      })
+      }).catch(() => {})
     }
   }
 })

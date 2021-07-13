@@ -61,24 +61,14 @@ export default defineComponent({
         port: parseInt(this.sftp.port),
         username: this.sftp.username,
         password: this.sftp.password
-      }).exec({
-        onSuccess: () => {
-          this.loading = false
-          this.$emit('done')
-          this.$accessor.alerts.add({
-            type: AlertType.Success,
-            title: 'Connected via SFTP'
-          })
-        },
-        onError: (msg) => {
-          this.loading = false
-          this.$accessor.alerts.add({
-            type: AlertType.Error,
-            title: 'Failed to establish SFTP connection',
-            content: msg
-          })
-        }
-      })
+      }).then((id) => {
+        this.$accessor.sftp.setSessionId(id)
+        this.$emit('done')
+        this.$accessor.alerts.add({
+          type: AlertType.Success,
+          title: 'Connected via SFTP'
+        })
+      }).catch(() => {}).finally(() => this.loading = false)
     }
   }
 })

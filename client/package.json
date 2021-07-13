@@ -14,9 +14,12 @@
     "@codemirror/history": "^0.18.1",
     "@codemirror/lang-javascript": "^0.18.0",
     "@codemirror/view": "^0.18.17",
+    "@types/uuid": "^8.3.1",
     "@zhuowenli/vue-feather-icons": "^5.0.2",
     "codemirror-languageserver": "^1.4.3",
-    "path-browserify": "^1.0.1"
+    "jsonrpc-lite": "^2.2.0",
+    "path-browserify": "^1.0.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/tailwindcss": "^2.0.3",
