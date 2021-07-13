@@ -1,4 +1,3 @@
-import store from 'store/clients'
 import jsonrpc, { RequestObject, JsonRpcError, Defined } from 'jsonrpc-lite'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { errorCodes, unknownError, sftpRpcError } from './errors'

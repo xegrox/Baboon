@@ -63,8 +63,7 @@ export async function sendRpcRequest(method: string, params?: object, sessionId?
     payload: jsonrpc.request(uuidv4(), method, params)
   })
 
-  let parsed = jsonrpc.parseJsonRpcString(res.body)
-  if (parsed instanceof Array) throw Error('Obtained multiple response objects')
+  let parsed = jsonrpc.parseObject(JSON.parse(res.body))
   let payload = parsed.payload
 
   if (payload instanceof JsonRpcError) throw Error(`Invalid rpc format: ${JSON.stringify(res.body)}`)

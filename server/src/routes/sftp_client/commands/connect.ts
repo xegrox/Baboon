@@ -16,7 +16,7 @@ const method = new Method({
     const sftp = new Client()
     return sftp.connect(this).then(() => {
       let key = process.env.SESSION_SECRET_KEY
-      if (!key) return jsonrpc.error(id, JsonRpcError.internalError('Env let SESSION_SECRET_KEY is not set'))
+      if (!key) return jsonrpc.error(id, JsonRpcError.internalError('Env SESSION_SECRET_KEY is not set'))
       let sessionId = uuidv4()
       let hashedId = createHmac('sha256', key).update(sessionId).digest('base64')
       store.set(hashedId, sftp)
