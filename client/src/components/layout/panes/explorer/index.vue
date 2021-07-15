@@ -35,7 +35,11 @@ export default defineComponent({
     onClickNode(node: TreeNode) {
       if (node instanceof TreeLeaf) {
         var projects = this.$accessor.projects
-        projects.all.get(projects.activePath)?.addTab(node.path)
+        projects.all.get(projects.activePath)?.editorPaneTabs.add(node.path, {
+          path: node.path,
+          modified: false,
+          saving: false
+        })
       }
     }
   }

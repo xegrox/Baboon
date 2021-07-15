@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { TabItem } from 'types/TabItem.interface'
+import { EditorPaneTab } from 'types/ProjectItem.class'
 import View from './view.vue'
 import FadeTransition from 'components/ui/transitions/Fade.vue'
 
@@ -19,7 +19,7 @@ export default defineComponent({
   },
   props: {
     tabs: {
-      type: Object as PropType<Map<string, TabItem>>
+      type: Object as PropType<Map<string, EditorPaneTab>>
     },
     activePath: {
       type: String,

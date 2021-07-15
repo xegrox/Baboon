@@ -7,7 +7,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import p from 'path-browserify'
-import { TabItem } from 'types/TabItem.interface'
+import { EditorPaneTab } from 'types/ProjectItem.class'
 import Item from './item.vue'
 
 export default defineComponent({
@@ -20,7 +20,7 @@ export default defineComponent({
       required: true
     },
     tabs: {
-      type: Object as PropType<Map<string, TabItem>>,
+      type: Object as PropType<Map<string, EditorPaneTab>>,
       required: true
     },
     activePath: {
