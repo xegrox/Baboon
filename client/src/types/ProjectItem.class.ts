@@ -1,4 +1,4 @@
-import { TabsPrototype } from './TabsPrototype.class'
+import { TabsManager } from './TabsManager.class'
 
 export interface EditorPaneTab {
   path: string,
@@ -9,7 +9,7 @@ export interface EditorPaneTab {
 export class ProjectItem {
   name: string
   path: string
-  editorPaneTabs = new TabsPrototype<EditorPaneTab>()
+  editorPaneTabs = new TabsManager<EditorPaneTab>()
 
   constructor(name: string, path: string) {
     this.name = name

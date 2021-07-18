@@ -5,13 +5,16 @@
       <div class="flex h-screen">
         <ProjectBar class="flex-none w-20"/>
         <div class="flex-1 flex flex-col">
-          <FadeTransition class="flex-1">
-            <div v-if="this.$accessor.projects.all.size > 0" class="flex">
-              <ExplorerPane class="flex-none w-80"/>
-              <EditorPane class="flex-1"/>
-            </div>
-            <div v-else class="flex-1"/>
-          </FadeTransition>
+          <div class="flex flex-1">
+            <FadeTransition class="flex-1">
+              <div v-if="this.$accessor.projects.all.size > 0" class="flex">
+                <ExplorerPane class="flex-none w-80"/>
+                <EditorPane class="flex-1"/>
+              </div>
+              <div v-else class="flex-1"/>
+            </FadeTransition>
+            <RightPane class="flex-none w-80"/>
+          </div>
           <StatusBar class="flex-none h-8"/>
         </div>
       </div>
@@ -25,6 +28,7 @@ import ProjectBar from 'components/layout/projectBar/index.vue'
 import StatusBar from 'components/layout/statusBar/index.vue'
 import ExplorerPane from 'components/layout/panes/explorer/index.vue'
 import EditorPane from 'components/layout/panes/editor/index.vue'
+import RightPane from 'components/layout/panes/right/index.vue'
 import Scrim from 'components/ui/Scrim.vue'
 import Setup from 'components/layout/Setup.vue'
 import AlertCenter from 'components/layout/AlertCenter.vue'
@@ -40,6 +44,7 @@ export default defineComponent({
     StatusBar,
     ExplorerPane,
     EditorPane,
+    RightPane,
     Setup,
     FadeTransition,
     Scrim,

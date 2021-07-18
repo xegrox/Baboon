@@ -24,6 +24,11 @@ export default defineComponent({
     Tabs,
     CodeViews,
     ProjectWrapper
+  },
+  props: {
+    tabsManager: {
+      type: Object as PropType<TabsManager>
+    }
   }
 })
 </script>

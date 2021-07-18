@@ -1,4 +1,9 @@
-export class TabsPrototype<T> {
+export interface GenericPaneTab {
+  name: string,
+  componentTag: string
+}
+
+export class TabsManager<T = GenericPaneTab> {
   private _all = new Map<string, T>()
   private _active = ''
 
