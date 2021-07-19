@@ -1,6 +1,6 @@
 <template>
   <div class="flex bg-gray-900 border-t-2 border-gray-800 w-full gap-5 px-6 items-center">
-    <Item class="ml-auto" text="LSP servers" @click="togglePane('lsp_servers', { name: 'LSP servers', componentTag: 'LSP' })"/>
+    <Item class="ml-auto" text="LSP servers" @click="openRightPane('lsp_servers', { name: 'LSP servers', viewTag: 'lsp'})"/>
     <Item text="Shortcuts"/>
   </div>
 </template>
@@ -15,9 +15,10 @@ export default defineComponent({
     Item
   },
   methods: {
-    togglePane(key: string, tab: GenericPaneTab) {
+    openRightPane(key: string, tab: GenericPaneTab) {
       let tabs = this.$accessor.panes.right
-      tabs?.all.has(key) ?  tabs?.remove(key) : tabs?.add(key, tab)
+      if (!tabs?.all.has(key)) tabs?.add(key, tab)
+      tabs.active = key
     }
   }
 })

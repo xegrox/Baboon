@@ -1,6 +1,6 @@
 export interface GenericPaneTab {
   name: string,
-  componentTag: string
+  viewTag: string
 }
 
 export class TabsManager<T = GenericPaneTab> {
@@ -28,7 +28,7 @@ export class TabsManager<T = GenericPaneTab> {
   remove(key: string) {
     this._all.delete(key)
     if (key === this._active && this._all.size > 0) {
-      this._active = this._all.values().next().value.path
+      this._active = this._all.keys().next().value
     }
   }
 }
