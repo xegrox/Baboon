@@ -5,7 +5,7 @@
       <div class="flex h-screen">
         <ProjectBar class="flex-none w-20"/>
         <div class="flex-1 flex flex-col">
-          <div class="flex flex-1">
+          <div class="flex flex-1 overflow-hidden">
             <FadeTransition class="flex-1">
               <div v-if="this.$accessor.projects.all.size > 0" class="flex">
                 <ExplorerPane class="flex-none w-80"/>
