@@ -1,6 +1,6 @@
 <template>
   <Modal ref="modal">
-    <div class="flex flex-col gap-y-4">
+    <div class="flex flex-col w-64 gap-y-4">
       <h1 class="text-2xl font-black text-white">Connect with SFTP</h1>
       <div/>
       <TextInput ref="input_1" v-model.trim="sftp.host" placeholder="Hostname" :disabled="loading" @enter="focusRef('input_2')"/>
