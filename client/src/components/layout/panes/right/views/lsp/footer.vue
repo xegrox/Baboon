@@ -2,9 +2,9 @@
   <div class="flex flex-col gap-4">
     <div>
       <ErrorLabel :errorMsg="errorMsg"/>
-      <TextInput prefix="wss://" placeholder="Url" v-model="url" @update:modelValue="url = $event" :disabled="loading" @input="errorMsg = ''" @enter="addServer(url)"/>
+      <TextInput prefix="ws://" placeholder="Url" v-model="url" @update:modelValue="url = $event" :disabled="loading" @input="errorMsg = ''" @enter="submit()"/>
     </div>
-    <ProgressButton @click="addServer(url)" :loading="loading" :disabled="url === ''">Add</ProgressButton>
+    <ProgressButton ref="submit" @click="addServer(url)" :loading="loading" :disabled="btnDisabled">Add</ProgressButton>
   </div>
 </template>
 
@@ -29,12 +29,20 @@ export default defineComponent({
       errorMsg: ''
     }
   },
+  computed: {
+    btnDisabled(): boolean {
+      return this.url === '' || this.$accessor.lspservers.all.get(this.url) ? true: false
+    }
+  },
   methods: {
+    submit() {
+      ((this.$refs.submit as any).$el as HTMLElement).click()
+    },
     addServer(url: string) {
       this.errorMsg = ''
       this.loading = true
       try {
-        let client  = new Client('wss://' + url, { reconnect: false })
+        let client  = new Client('ws://' + url, { reconnect: false })
 
         client.on('error', () => {
           this.loading = false
@@ -43,6 +51,11 @@ export default defineComponent({
 
         client.on('open', () => {
           let lspClient = new LanguageServerClient(client)
+          lspClient.onPublishDiagnostics = (params) => {
+            params.diagnostics.forEach((d) => {
+              console.log(d)
+            })
+          }
           lspClient.initialize().then(() => {
             this.$accessor.lspservers.all.set(url, lspClient)
           }).catch((e) => {

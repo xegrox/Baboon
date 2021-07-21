@@ -9,17 +9,22 @@ interface LSPNotifyMap {
   'initialized': LSP.InitializedParams,
   'textDocument/didOpen': LSP.DidOpenTextDocumentParams,
   'textDocument/didChange': LSP.DidChangeTextDocumentParams,
-  'textDocument/didClose': LSP.DidCloseTextDocumentParams
+  'textDocument/didClose': LSP.DidCloseTextDocumentParams,
+  'workspace/didChangeWorkspaceFolders': LSP.DidChangeWorkspaceFoldersParams
 }
 
 export class LanguageServerClient {
   private documentVersion = 0
+  private _diagnosticListeners = new Map<string, (d: LSP.Diagnostic[]) => void>()
 
-  onPublishDiagnostics: (params: LSP.PublishDiagnosticsParams) => void = () =>{}
+  constructor(private client: Client) {}
 
-  constructor(private client: Client) {
-    client.subscribe('textDocument/publishDiagnostics')
-    client.on('textDocument/publishDiagnostics', this.onPublishDiagnostics)
+  setDiagnosticsListener(uri: string, cb: (d: LSP.Diagnostic[]) => void) {
+    this._diagnosticListeners.set(uri, cb)
+  }
+
+  removeDiagnosticsListener(uri: string) {
+    this._diagnosticListeners.delete(uri)
   }
 
   private request<K extends keyof LSPRequestMap>(method: K, params: LSPRequestMap[K][0])
@@ -36,21 +41,33 @@ export class LanguageServerClient {
 
   async initialize() {
     await this.request('initialize', {
-      rootUri: 'file:///',
+      rootUri: null,
       processId: null,
-      workspaceFolders: [{
-        uri: 'file:///',
-        name: 'root'
-      }],
+      workspaceFolders: [],
       capabilities: {
-
+        workspace: {
+          workspaceFolders: true
+        }
       }
     })
     this.notify('initialized', {})
+    this.client.on('textDocument/publishDiagnostics', ((params: LSP.PublishDiagnosticsParams) => {
+      this._diagnosticListeners.get(params.uri)?.(params.diagnostics)
+    }).bind(this))
+  }
+
+  close() {
+    this.client.close()
+  }
+
+  notifyWorkspaceEdit(changes: LSP.WorkspaceFoldersChangeEvent) {
+    return this.notify('workspace/didChangeWorkspaceFolders', {
+      event: changes
+    })
   }
 
   notifyDocOpen(uri: string, content: string) {
-    this.notify('textDocument/didOpen', {
+    return this.notify('textDocument/didOpen', {
       textDocument: {
         uri,
         languageId: 'typescript',
@@ -62,7 +79,7 @@ export class LanguageServerClient {
 
   notifyDocChange(uri: string, content: string) {
     this.documentVersion++
-    this.notify('textDocument/didChange', {
+    return this.notify('textDocument/didChange', {
       textDocument: { uri, version: this.documentVersion },
       contentChanges: [{ text: content }]
     })
@@ -70,7 +87,7 @@ export class LanguageServerClient {
 
   notifyDocClose(uri: string) {
     this.documentVersion = 0
-    this.notify('textDocument/didClose', {
+    return this.notify('textDocument/didClose', {
       textDocument: { uri }
     })
   }

@@ -4,7 +4,7 @@
       <div
         v-for="[key] in lspClients"
         :key="key"
-        @click="toggleActiveUrl(key)"
+        @click="toggleUrl(key)"
         class="py-2 transition">
         <div
           class="flex gap-2 rounded-md border-2 border-gray-700 p-4 items-center group bg-white bg-opacity-0 hover:bg-opacity-5 transition"
@@ -28,13 +28,32 @@ export default defineComponent({
     TrashIcon
   },
   methods: {
-    toggleActiveUrl(url: string) {
-      if (this.activeProject) {
-        if (this.activeProject.lspServerUrl === url) this.activeProject.lspServerUrl = ''
-        else this.activeProject.lspServerUrl = url
+    toggleUrl(url: string) {
+      let client = this.$accessor.lspservers.all.get(url)
+      if (!this.activeProject) return
+      let projectWorkspace = {
+        name: this.activeProject.name,
+        uri: 'file://' + this.activeProject.path
+      }
+
+      if (this.activeProject.lspServerUrl === url) {
+        this.activeProject.lspServerUrl = ''
+        if (!client) return
+        client.notifyWorkspaceEdit({
+          added: [],
+          removed: [projectWorkspace]
+        })
+      } else {
+        if (!client) return
+        this.activeProject.lspServerUrl = url
+        client.notifyWorkspaceEdit({
+          added: [projectWorkspace],
+          removed: []
+        })
       }
     },
     removeUrl(url: string) {
+      this.lspClients.get(url)?.close()
       this.lspClients.delete(url)
     }
   },

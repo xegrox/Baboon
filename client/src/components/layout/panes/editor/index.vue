@@ -8,7 +8,11 @@
         @update:activePath="slotProps.project.editorPaneTabs.active = $event"
         @closeTab="slotProps.project.editorPaneTabs.remove($event)" class="flex-none h-12"
       />
-      <CodeViews :tabs="slotProps.project.editorPaneTabs.all" :activePath="slotProps.project.editorPaneTabs.active" class="flex-1"/>
+      <CodeViews
+        :tabs="slotProps.project.editorPaneTabs.all"
+        :activePath="slotProps.project.editorPaneTabs.active"
+        :lspServerUrl="slotProps.project.lspServerUrl"
+        class="flex-1"/>
     </div>
   </ProjectWrapper>
 </template>
