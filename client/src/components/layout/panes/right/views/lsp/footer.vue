@@ -51,11 +51,6 @@ export default defineComponent({
 
         client.on('open', () => {
           let lspClient = new LanguageServerClient(client)
-          lspClient.onPublishDiagnostics = (params) => {
-            params.diagnostics.forEach((d) => {
-              console.log(d)
-            })
-          }
           lspClient.initialize().then(() => {
             this.$accessor.lspservers.all.set(url, lspClient)
           }).catch((e) => {
