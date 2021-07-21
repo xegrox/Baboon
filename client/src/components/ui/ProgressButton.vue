@@ -22,7 +22,7 @@ export default defineComponent({
     },
     indeterminate: {
       type: Boolean,
-      default: false
+      default: true
     },
     progress: {
       type: Number,

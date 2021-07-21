@@ -7,8 +7,8 @@
           @update:activeKey="tabs.active = $event"
           @closeTab="tabs.remove($event)"
         />
-        <div class="relative flex-1">
-          <FadeTransition v-for="[key, item] in views" :key="key" class="absolute h-full w-full">
+        <div class="relative flex-1 w-80">
+          <FadeTransition v-for="[key, item] in views" :key="key" class="absolute w-full h-full">
             <component v-show="key === tabs.active" :is="item"/>
           </FadeTransition>
         </div>
@@ -34,7 +34,7 @@ export default defineComponent({
     views(): Map<string, Component> {
       let views = new Map<string, Component>()
       this.$accessor.panes.right.all.forEach((tab, key) => {
-        views.set(key, defineAsyncComponent(() => import(`./views/${tab.viewTag}.vue`)))
+        views.set(key, defineAsyncComponent(() => import(`./views/${tab.viewTag}/index.vue`)))
       })
       return views
     }

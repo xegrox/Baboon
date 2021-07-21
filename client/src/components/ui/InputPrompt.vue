@@ -2,11 +2,7 @@
   <div>
     <Modal ref="modal" width="40%" dismissible>
       <TextInput v-model="value" :placeholder="placeholder" :disabled="disabled" @input="setError('')" @enter="$emit('enter', value)" autofocus/>
-      <ExpandTransition>
-        <div v-if="errorMsg !== ''">
-          <p class="mt-4 text-red-200">{{ errorMsg }}</p>
-        </div>
-      </ExpandTransition>
+      <ErrorLabel :errorMsg="errorMsg"/>
     </Modal>
   </div>
 </template>
@@ -15,13 +11,13 @@
 import { defineComponent } from 'vue'
 import Modal from 'components/ui/Modal.vue'
 import TextInput from 'components/ui/TextInput.vue'
-import ExpandTransition from 'components/ui/transitions/Expand.vue'
+import ErrorLabel from 'components/ui/ErrorLabel.vue'
 
 export default defineComponent({
   components: {
     Modal,
     TextInput,
-    ExpandTransition
+    ErrorLabel
   },
   props: {
     placeholder: String
