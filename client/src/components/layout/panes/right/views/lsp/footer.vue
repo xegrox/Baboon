@@ -53,6 +53,10 @@ export default defineComponent({
           let lspClient = new LanguageServerClient(client)
           lspClient.initialize().then(() => {
             this.$accessor.lspservers.all.set(url, lspClient)
+            client.removeAllListeners('error')
+            client.on('close', () => {
+              this.$accessor.lspservers.all.delete(url)
+            })
           }).catch((e) => {
             let msg = (e as Error).message
             msg = msg.charAt(0).toUpperCase() + msg.slice(1);

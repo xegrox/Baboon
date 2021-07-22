@@ -43,6 +43,7 @@ export default defineComponent({
     lspClient: {
       immediate: true,
       handler(n?: LanguageServerClient, o?: LanguageServerClient) {
+        this.view.dispatch(setDiagnostics(this.view.state as EditorState, []))
         n?.notifyDocOpen(this.pathUri, this.view.state.doc.toString())
         n?.setDiagnosticsListener(this.pathUri, this.handleDiagnostics)
         o?.notifyDocClose(this.pathUri)
