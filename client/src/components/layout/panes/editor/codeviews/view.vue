@@ -13,6 +13,7 @@ import { defaultTabBinding, defaultKeymap } from '@codemirror/commands'
 import { indentOnInput } from '@codemirror/language'
 import { setDiagnostics, Diagnostic } from '@codemirror/lint'
 import { autocompletion, CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete'
+import { hoverTooltip, TooltipView } from '@codemirror/tooltip'
 import { theme } from 'assets/js/cm-theme'
 import { javascript } from '@codemirror/lang-javascript'
 import { LanguageServerClient } from 'api/lsp'
@@ -126,7 +127,7 @@ export default defineComponent({
         // TODO: parse markdown in docs
         return {
           label, sortText, apply, detail,
-          info: typeof documentation === 'string' ? documentation : documentation?.value
+          info: documentation ? this.parseMarkup(documentation) : undefined
         }
       })
 
@@ -147,6 +148,12 @@ export default defineComponent({
         options,
         span: /\w*/
       }
+    },
+    parseMarkup(content: LSP.MarkupContent | LSP.MarkedString | LSP.MarkedString[] | string): string {
+      // TODO: parse markup
+      if (typeof content === 'string') return content
+      else if (Array.isArray(content)) return content.map((c) => this.parseMarkup(c)).join('\n\n')
+      else return content.value
     }
   },
   unmounted() {
@@ -206,6 +213,22 @@ export default defineComponent({
                 if (!completion) return null
                 return this.processCompletion(ctx, completion)
               }]
+            }),
+            hoverTooltip(async (view, pos) => {
+              let hover = await this.lspClient?.requestHover('file://' + this.path, this.offsetToPos(view.state.doc, pos))
+              if (!hover) return null
+              let parsed = this.parseMarkup(hover.contents)
+              return {
+                pos: hover.range ? this.posToOffset(view.state.doc, hover.range.start) : pos,
+                end: hover.range ? this.posToOffset(view.state.doc, hover.range.end) : undefined,
+                create(_) {
+                  let dom = document.createElement('div')
+                  dom.textContent = parsed
+                  return {
+                    dom
+                  }
+                }
+              }
             }),
             keymap.of([
               defaultTabBinding,

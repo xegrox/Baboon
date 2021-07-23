@@ -3,7 +3,8 @@ import * as LSP from 'vscode-languageserver-protocol'
 
 interface LSPRequestMap {
   'initialize': [LSP.InitializeParams, LSP.InitializeResult],
-  'textDocument/completion': [LSP.CompletionParams, LSP.CompletionItem[] | LSP.CompletionList| null]
+  'textDocument/completion': [LSP.CompletionParams, LSP.CompletionItem[] | LSP.CompletionList| null],
+  'textDocument/hover': [LSP.HoverParams, LSP.Hover | null]
 }
 
 interface LSPNotifyMap {
@@ -104,6 +105,13 @@ export class LanguageServerClient {
   requestCompletion(uri: string, pos: LSP.Position, ctx: LSP.CompletionContext) {
     return this.request('textDocument/completion', {
       context: ctx,
+      textDocument: { uri },
+      position: pos
+    })
+  }
+
+  requestHover(uri: string, pos: LSP.Position) {
+    return this.request('textDocument/hover', {
       textDocument: { uri },
       position: pos
     })
