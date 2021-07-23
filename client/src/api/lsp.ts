@@ -2,7 +2,8 @@ import { Client } from 'rpc-websockets'
 import * as LSP from 'vscode-languageserver-protocol'
 
 interface LSPRequestMap {
-  'initialize': [LSP.InitializeParams, LSP.InitializeResult]
+  'initialize': [LSP.InitializeParams, LSP.InitializeResult],
+  'textDocument/completion': [LSP.CompletionParams, LSP.CompletionItem[] | LSP.CompletionList| null]
 }
 
 interface LSPNotifyMap {
@@ -16,6 +17,7 @@ interface LSPNotifyMap {
 export class LanguageServerClient {
   private documentVersion = 0
   private _diagnosticListeners = new Map<string, (d: LSP.Diagnostic[]) => void>()
+  public serverCapabilities?: LSP.ServerCapabilities
 
   constructor(private client: Client) {}
 
@@ -40,16 +42,23 @@ export class LanguageServerClient {
   }
 
   async initialize() {
-    await this.request('initialize', {
+    let { capabilities } = await this.request('initialize', {
       rootUri: null,
       processId: null,
       workspaceFolders: [],
       capabilities: {
         workspace: {
           workspaceFolders: true
+        },
+        textDocument: {
+          moniker: {},
+          completion: {
+            contextSupport: true
+          }
         }
       }
     })
+    this.serverCapabilities = capabilities
     this.notify('initialized', {})
     this.client.on('textDocument/publishDiagnostics', ((params: LSP.PublishDiagnosticsParams) => {
       this._diagnosticListeners.get(params.uri)?.(params.diagnostics)
@@ -70,7 +79,7 @@ export class LanguageServerClient {
     return this.notify('textDocument/didOpen', {
       textDocument: {
         uri,
-        languageId: 'typescript',
+        languageId: '',
         text: content,
         version: this.documentVersion
       }
@@ -89,6 +98,14 @@ export class LanguageServerClient {
     this.documentVersion = 0
     return this.notify('textDocument/didClose', {
       textDocument: { uri }
+    })
+  }
+
+  requestCompletion(uri: string, pos: LSP.Position, ctx: LSP.CompletionContext) {
+    return this.request('textDocument/completion', {
+      context: ctx,
+      textDocument: { uri },
+      position: pos
     })
   }
 }
