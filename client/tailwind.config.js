@@ -17,11 +17,16 @@ module.exports = {
   variants: {
     extend: {
       scale: ['group-hover'],
-      transitionProperty: ['important']
+      transitionProperty: ['important'],
+      borderColor: ['important'],
+      textColor: ['important']
     },
   },
   theme: {
     extend: {
+      height: {
+        46: '11.5rem'
+      },
       colors: {
         gray: {
           '100': '#F8F8F8',

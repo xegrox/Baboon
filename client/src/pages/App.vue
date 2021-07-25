@@ -2,26 +2,33 @@
   <div class="bg-black">
     <Scrim :show="pinging"/>
     <Setup ref="setup" @done="$accessor.sftp.setConnected(true)" bindClass="z-30"/>
-    <div class="flex h-screen">
-      <div class="flex flex-initial">
-        <Projects class="flex-none w-20"/>
-      </div>
-      <FadeTransition>
-        <div v-if="this.$accessor.projects.all.size > 0" class="flex h-full w-full">
-          <Explorer class="flex-none w-80"/>
-          <Editor class="flex-1"/>
+      <div class="flex h-screen">
+        <ProjectBar class="flex-none w-20"/>
+        <div class="flex-1 flex flex-col">
+          <div class="flex flex-1 overflow-hidden">
+            <FadeTransition class="flex-1">
+              <div v-if="this.$accessor.projects.all.size > 0" class="flex">
+                <ExplorerPane class="flex-none w-80"/>
+                <EditorPane class="flex-1"/>
+              </div>
+              <div v-else class="flex-1"/>
+            </FadeTransition>
+            <RightPane class="flex-none w-80"/>
+          </div>
+          <StatusBar class="flex-none h-8"/>
         </div>
-      </FadeTransition>
-    </div>
+      </div>
     <AlertCenter class="z-40"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Projects from 'components/layout/panes/projects/index.vue'
-import Explorer from 'components/layout/panes/explorer/index.vue'
-import Editor from 'components/layout/panes/editor/index.vue'
+import ProjectBar from 'components/layout/projectBar/index.vue'
+import StatusBar from 'components/layout/statusBar/index.vue'
+import ExplorerPane from 'components/layout/panes/explorer/index.vue'
+import EditorPane from 'components/layout/panes/editor/index.vue'
+import RightPane from 'components/layout/panes/right/index.vue'
 import Scrim from 'components/ui/Scrim.vue'
 import Setup from 'components/layout/Setup.vue'
 import AlertCenter from 'components/layout/AlertCenter.vue'
@@ -33,9 +40,11 @@ import { Pong } from 'api/sftp'
 export default defineComponent({
   name: 'Baboon',
   components: {
-    Projects,
-    Explorer,
-    Editor,
+    ProjectBar,
+    StatusBar,
+    ExplorerPane,
+    EditorPane,
+    RightPane,
     Setup,
     FadeTransition,
     Scrim,

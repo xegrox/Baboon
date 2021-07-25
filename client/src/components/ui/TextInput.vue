@@ -1,7 +1,23 @@
 <template>
   <div class="relative">
-    <input ref="input" :type="type !== 'number' ? type : ''" @keypress="isNumber" @paste.prevent @input="updateValue" @keyup.enter="$emit('enter')" :value="modelValue" :disabled="disabled" autocomplete="off" :class="{ filled: modelValue !== '', 'opacity-75': disabled}" class="appearance-none rounded-lg w-full px-3 py-3 pt-5 pb-2 bg-gray-700 text-gray-200"/>
-    <label class="absolute mb-0 -mt-2 pt-4 pl-3 leading-tighter text-gray-400 text-base mt-2 cursor-text pointer-events-none">{{ placeholder }}</label>
+    <div :class="{ 'opacity-75': disabled }" class="rounded-lg w-full px-3 pt-5 pb-2 bg-gray-700 text-gray-200 transition-opacity">
+      <div class="flex w-full gap-1">
+        <p v-if="prefix" class="flex-none text-white text-opacity-70">{{ prefix }}</p>
+        <input
+          ref="input"
+          :type="type !== 'number' ? type : ''"
+          @keypress="isNumber"
+          @paste.prevent
+          @input="updateValue"
+          @keyup.enter="$emit('enter')"
+          :value="modelValue"
+          :disabled="disabled"
+          autocomplete="off"
+          :class="{ filled: prefix !== undefined || modelValue !== '' }"
+          class="appearance-none bg-transparent outline-none flex-1"/>
+        <label class="absolute mb-0 -mt-2 pt-4 pl-3 leading-tighter text-gray-400 text-base mt-2 cursor-text pointer-events-none">{{ placeholder }}</label>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -14,6 +30,7 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    prefix: String,
     placeholder: String,
     type: String,
     disabled: {
@@ -45,11 +62,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-input {
-    transition: border 0.2s ease-in-out, opacity 0.2s;
-    min-width: 280px
-}
-
 input:focus+label,
 input:active+label,
 input.filled+label {

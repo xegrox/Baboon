@@ -7,6 +7,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^0.18.8",
     "@codemirror/closebrackets": "^0.18.0",
     "@codemirror/commands": "^0.18.3",
     "@codemirror/gutter": "^0.18.4",
@@ -14,12 +15,15 @@
     "@codemirror/history": "^0.18.1",
     "@codemirror/lang-javascript": "^0.18.0",
     "@codemirror/view": "^0.18.17",
+    "@open-rpc/client-js": "^1.7.0",
     "@types/uuid": "^8.3.1",
     "@zhuowenli/vue-feather-icons": "^5.0.2",
-    "codemirror-languageserver": "^1.4.3",
+    "events": "^3.3.0",
     "jsonrpc-lite": "^2.2.0",
     "path-browserify": "^1.0.1",
-    "uuid": "^8.3.2"
+    "rpc-websockets": "^7.4.12",
+    "uuid": "^8.3.2",
+    "vscode-languageserver-protocol": "^3.16.0"
   },
   "devDependencies": {
     "@types/tailwindcss": "^2.0.3",

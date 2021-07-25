@@ -2,12 +2,12 @@
   <div>
     <FilePicker ref="filepicker" rootName="/" rootPath="/" @done="onSelect" pickFolder/>
     <div class="h-full bg-gray-800 flex flex-col items-center pt-7 gap-5">
-      <ProjectBarItem @click="$refs.filepicker.open()">
+      <Item @click="$refs.filepicker.open()">
         <PlusIcon class="w-5 h-5 text-gray-400"/>
-      </ProjectBarItem>
-      <ProjectBarItem v-for="[key, item] in projects" :key="key" :active="activePath === item.path" @click="setActive(item.path)" @close="this.$accessor.projects.remove(key)">
+      </Item>
+      <Item v-for="[key, item] in projects" :key="key" :active="activePath === item.path" @click="setActive(item.path)" @close="this.$accessor.projects.remove(key)">
         <p class="text-xl font-mono">{{ item.name.charAt(0).toUpperCase() }}</p>
-      </ProjectBarItem>
+      </Item>
     </div>
   </div>
 </template>
@@ -16,14 +16,14 @@
 import { defineComponent } from 'vue'
 import { ProjectItem } from 'types/ProjectItem.class'
 import { PlusIcon } from '@zhuowenli/vue-feather-icons'
-import ProjectBarItem from './ProjectBarItem.vue'
+import Item from './item.vue'
 import FilePicker from 'components/layout/FilePicker.vue'
 
 export default defineComponent({
   components: {
     PlusIcon,
     FilePicker,
-    ProjectBarItem
+    Item
   },
   methods: {
     onSelect(path: string) {

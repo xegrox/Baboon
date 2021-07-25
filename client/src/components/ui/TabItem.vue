@@ -1,5 +1,5 @@
 <template>
-  <div class="group flex flex-1 items-center text-gray-400 truncate hover:bg-gray-800 transition-colors" :class="{ 'bg-white bg-opacity-10': isActive, 'bg-gray-900': !isActive }">
+  <div class="group flex flex-1 items-center text-gray-400 truncate hover:bg-gray-800 transition-colors bg-transparent" :class="{ 'bg-gray-900': !isActive }">
     <div class="flex truncate px-4 w-full items-center relative">
       <p class="flex-1 truncate text-center text-sm mx-12 font-mono group-hover:text-white transition-colors" :class="{ 'text-white': isActive }">{{ name }}</p>
       <div class="flex-none absolute right-0 mr-6">
@@ -36,11 +36,11 @@ export default defineComponent({
     },
     isModified: {
       type: Boolean,
-      required: true
+      default: false
     },
     isSaving: {
       type: Boolean,
-      required: true
+      default: false
     }
   }
 })

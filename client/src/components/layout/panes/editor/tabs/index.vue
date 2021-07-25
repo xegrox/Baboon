@@ -1,18 +1,18 @@
 <template>
-  <div class="flex">
-    <TabBarItem v-for="[key, tab] in tabs" :key="key" :name="nameFromPath(tab.path)" :isActive="activePath === tab.path"  :isModified="tab.modified" :isSaving="tab.saving" @click="$emit('update:activePath', tab.path)" @close="$emit('closeTab', tab.path)"></TabBarItem>
+  <div class="flex bg-white bg-opacity-10">
+    <TabItem v-for="[key, tab] in tabs" :key="key" :name="nameFromPath(tab.path)" :isActive="activePath === tab.path"  :isModified="tab.modified" :isSaving="tab.saving" @click="$emit('update:activePath', tab.path)" @close="$emit('closeTab', tab.path)"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import p from 'path-browserify'
-import { TabItem } from 'types/TabItem.interface'
-import TabBarItem from './TabBarItem.vue'
+import { EditorPaneTab } from 'types/ProjectItem.class'
+import TabItem from 'components/ui/TabItem.vue'
 
 export default defineComponent({
   components: {
-   TabBarItem
+   TabItem
   },
   props: {
     rootPath: {
@@ -20,7 +20,7 @@ export default defineComponent({
       required: true
     },
     tabs: {
-      type: Object as PropType<Map<string, TabItem>>,
+      type: Object as PropType<Map<string, EditorPaneTab>>,
       required: true
     },
     activePath: {
