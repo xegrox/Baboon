@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-4">
     <div>
       <ErrorLabel :errorMsg="errorMsg"/>
-      <TextInput prefix="ws://" placeholder="Url" v-model="url" @update:modelValue="url = $event" :disabled="loading" @input="errorMsg = ''" @enter="submit()"/>
+      <TextInput prefix="ws://" placeholder="Url" v-model="url" @update:modelValue="url = $event ?? ''" :disabled="loading" @input="errorMsg = ''" @enter="submit()"/>
     </div>
     <ProgressButton ref="submit" @click="addServer(url)" :loading="loading" :disabled="btnDisabled">Add</ProgressButton>
   </div>

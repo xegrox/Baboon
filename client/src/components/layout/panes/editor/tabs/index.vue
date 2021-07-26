@@ -20,7 +20,7 @@ export default defineComponent({
       required: true
     },
     tabs: {
-      type: Object as PropType<Map<string, EditorPaneTab>>,
+      type: Object as PropType<ReadonlyMap<string, EditorPaneTab>>,
       required: true
     },
     activePath: {

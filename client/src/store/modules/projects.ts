@@ -2,7 +2,7 @@ import { mutationTree } from 'typed-vuex'
 import { ProjectItem } from 'types/ProjectItem.class'
 
 const state = {
-  all: new Map<String, ProjectItem>(),
+  all: new Map<string, ProjectItem>(),
   activePath: ''
 }
 

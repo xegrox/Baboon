@@ -2,7 +2,7 @@
   <Modal ref="modal" dismissible>
     <p class="text-gray-200 text-xl">{{ message }}</p>
     <div class="flex mt-8 gap-4 items-center justify-end">
-      <TextButton @click="$refs.modal.close()">
+      <TextButton @click="close()">
         <p class="pr-4 pl-4">Cancel</p>
       </TextButton>
       <ProgressButton :loading="loading" @click="$emit('positive')" indeterminate>

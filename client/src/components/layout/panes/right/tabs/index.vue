@@ -7,7 +7,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import TabItem from 'components/ui/TabItem.vue'
-import { GenericPaneTab } from 'types/ProjectItem.class'
+import { GenericPaneTab } from 'types/TabsManager.class'
 
 export default defineComponent({
   components: {
@@ -19,7 +19,7 @@ export default defineComponent({
       required: true
     },
     tabs: {
-      type: Object as PropType<Map<string, GenericPaneTab>>,
+      type: Object as PropType<ReadonlyMap<string, GenericPaneTab>>,
       required: true
     }
   }

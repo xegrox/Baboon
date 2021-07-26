@@ -1,10 +1,10 @@
 <template>
-  <Modal ref="model" width="50%" height="70%" dismissible>
+  <Modal ref="modal" width="50%" height="70%" dismissible>
     <div class="w-full h-full flex flex-col gap-5">
       <TextInput placeholder="Path" v-model="path"/>
       <FileTreeWrapper class="w-full h-full overflow-auto" :path="rootPath" :name="rootName" @activePathUpdate="path = $event" :allowFolder="pickFolder" :allowFile="pickFile"/>
       <div class="flex flex-none gap-4 items-center justify-end">
-        <TextButton @click="$refs.model.close()">
+        <TextButton @click="close()">
           <p class="pr-4 pl-4">Cancel</p>
         </TextButton>
         <ProgressButton :loading="loading" :disabled="path === ''" @click="checkPath" indeterminate>
@@ -59,8 +59,8 @@ export default defineComponent({
     }
   },
   methods: {
-    open() { (this.$refs.model as any).open() },
-    close() { (this.$refs.model as any).open() },
+    open() { (this.$refs.modal as any).open() },
+    close() { (this.$refs.modal as any).close() },
     alertError(title: string, content?: string) {
       this.$accessor.alerts.add({
         type: AlertType.Error,
@@ -83,7 +83,7 @@ export default defineComponent({
             this.alertError('Path does not lead to a file')
             return
           }
-          (this.$refs.model as any).close()
+          (this.$refs.modal as any).close()
           this.$emit('done', path)
         }
       }).catch(() => {}).finally(() => this.loading = false)

@@ -3,11 +3,11 @@
     <div :style="indent" class="flex gap-2 rounded-lg items-center bg-gray-100 bg-opacity-0 hover:bg-opacity-5 transition-colors pr-5 pt-2 pb-2" :class="{ 'bg-opacity-10': isActive, 'pointer-events-none opacity-50': !isBranch && disabled }" @contextmenu.prevent="onRightClick" @click="onClick">
       <component :is="isBranch ? 'FolderIcon': 'FileIcon'" class="flex-none text-white"/>
       <p class="text-white truncate text-sm">{{ item.name }}</p>
-      <ChevronDownIcon v-if="item.children" class="flex-none ml-auto text-gray-400 transition-all transform" :class="{ 'rotate-180': item.expanded }"/>
+      <ChevronDownIcon v-if="isBranch" class="flex-none ml-auto text-gray-400 transition-all transform" :class="{ 'rotate-180': castBranch(item).expanded }"/>
     </div>
     <TransitionExpand>
-      <div v-if="item.children" v-show="item.expanded">
-        <FileTree v-for="node in item.children" :key="node.name" :item="node" :depth="depth+1" :allowFile="allowFile" :allowFolder="allowFolder" :activePath="activePath" @rightClickNode="(n, e) => $emit('rightClickNode', n ,e)" @clickNode="(n, e) => $emit('clickNode', n, e)"/>
+      <div v-if="isBranch" v-show="castBranch(item).expanded">
+        <FileTree v-for="node in castBranch(item).children" :key="node.name" :item="node" :depth="depth+1" :allowFile="allowFile" :allowFolder="allowFolder" :activePath="activePath" @rightClickNode="echoRightClickEvent" @clickNode="echoClickEvent"/>
       </div>
     </TransitionExpand>
   </div>
@@ -73,6 +73,15 @@ export default defineComponent({
     }
   },
   methods: {
+    echoClickEvent(n: TreeNode, e: MouseEvent) {
+      this.$emit('clickNode', n, e)
+    },
+    echoRightClickEvent(n: TreeNode, e: MouseEvent) {
+      this.$emit('rightClickNode', n, e)
+    },
+    castBranch(item: TreeNode): TreeBranch {
+      return item as TreeBranch
+    },
     toggleBranch(branch: TreeBranch) {
       if (branch.expanded) {
         branch.expanded = false
