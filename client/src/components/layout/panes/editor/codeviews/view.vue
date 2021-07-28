@@ -10,12 +10,12 @@ import { lineNumbers, highlightActiveLineGutter } from '@codemirror/gutter'
 import { history, historyKeymap } from '@codemirror/history'
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/closebrackets'
 import { defaultTabBinding, defaultKeymap } from '@codemirror/commands'
-import { indentOnInput } from '@codemirror/language'
+import { indentOnInput, LanguageDescription } from '@codemirror/language'
 import { setDiagnostics, Diagnostic } from '@codemirror/lint'
 import { autocompletion, CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete'
-import { hoverTooltip, TooltipView } from '@codemirror/tooltip'
+import { hoverTooltip } from '@codemirror/tooltip'
 import { theme } from 'assets/js/cm-theme'
-import { javascript } from '@codemirror/lang-javascript'
+import { languages } from '@codemirror/language-data'
 import { LanguageServerClient } from 'api/lsp'
 import * as LSP from 'vscode-languageserver-protocol'
 
@@ -161,7 +161,8 @@ export default defineComponent({
     this.lspClient?.removeDiagnosticsListener(this.pathUri)
   },
   mounted() {
-    this.$sftp.read(this.path).then((content) => {
+    this.$sftp.read(this.path).then(async (content) => {
+      let language = await LanguageDescription.matchFilename(languages, this.path)?.load()
       this.view = new EditorView({
         parent: this.$refs.editor as HTMLElement,
         state: EditorState.create({
@@ -182,7 +183,7 @@ export default defineComponent({
             closeBrackets(),
             indentOnInput(),
             autocompletion({
-              override: [async (ctx) => {
+              override: this.lspClient ? [async (ctx) => {
                 // There are two types of autocomplete triggers:
                 // TriggerCharacter: when a specific character is entered (e.g. '.')
                 // Invoked: when typing an identifier or manually invoked (Ctrl + Space)
@@ -212,7 +213,7 @@ export default defineComponent({
 
                 if (!completion) return null
                 return this.processCompletion(ctx, completion)
-              }]
+              }] : undefined
             }),
             hoverTooltip(async (view, pos) => {
               let hover = await this.lspClient?.requestHover('file://' + this.path, this.offsetToPos(view.state.doc, pos))
@@ -244,11 +245,8 @@ export default defineComponent({
                 }
               }
             ]),
-            theme,
-            javascript({
-              typescript: true
-            })
-          ]
+            theme
+          ].concat(language ? language : [])
         })
       })
       this.initialDoc = this.view.state.doc
