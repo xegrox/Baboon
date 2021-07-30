@@ -4,7 +4,7 @@
       <View
         v-show="item.path === activePath"
         class="h-full w-full" :path="item.path"
-        :lspClient="lspClient"
+        :lspServerUrls="lspServerUrls"
         @modified="item.modified = $event"
         @saving="item.saving = $event"/>
     </FadeTransition>
@@ -16,7 +16,6 @@ import { defineComponent, PropType } from 'vue'
 import { EditorPaneTab } from 'types/ProjectItem.class'
 import View from './view.vue'
 import FadeTransition from 'components/ui/transitions/Fade.vue'
-import { LanguageServerClient } from 'api/lsp'
 
 export default defineComponent({
   components: {
@@ -32,14 +31,9 @@ export default defineComponent({
       type: String,
       required: true
     },
-    lspServerUrl: {
-      type: String,
+    lspServerUrls: {
+      type: Object as PropType<Set<string>>,
       required: true
-    }
-  },
-  computed: {
-    lspClient(): LanguageServerClient | undefined {
-      return this.$accessor.lspservers.all.get(this.lspServerUrl)
     }
   }
 })

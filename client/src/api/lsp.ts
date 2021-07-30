@@ -1,5 +1,6 @@
 import { Client } from 'rpc-websockets'
 import * as LSP from 'vscode-languageserver-protocol'
+import p from 'path-browserify'
 
 interface LSPRequestMap {
   'initialize': [LSP.InitializeParams, LSP.InitializeResult],
@@ -15,19 +16,25 @@ interface LSPNotifyMap {
   'workspace/didChangeWorkspaceFolders': LSP.DidChangeWorkspaceFoldersParams
 }
 
-export class LanguageServerClient {
+export class LSPClient {
   private documentVersion = 0
   private _diagnosticListeners = new Map<string, (d: LSP.Diagnostic[]) => void>()
   public serverCapabilities?: LSP.ServerCapabilities
 
-  constructor(private client: Client) {}
+  constructor(public client: Client, public pathPrefix = '') {}
 
-  setDiagnosticsListener(uri: string, cb: (d: LSP.Diagnostic[]) => void) {
-    this._diagnosticListeners.set(uri, cb)
+  private resolvePath(path: string): string {
+    return 'file://' + p.join(this.pathPrefix + path)
   }
 
-  removeDiagnosticsListener(uri: string) {
-    this._diagnosticListeners.delete(uri)
+  setDiagnosticsListener(path: string, cb: (d: LSP.Diagnostic[]) => void) {
+    console.log(this.resolvePath(path))
+    this._diagnosticListeners.set(this.resolvePath(path), cb)
+  }
+
+  removeDiagnosticsListener(path: string) {
+    console.log(this.resolvePath(path))
+    this._diagnosticListeners.delete(this.resolvePath(path))
   }
 
   private request<K extends keyof LSPRequestMap>(method: K, params: LSPRequestMap[K][0])
@@ -70,16 +77,37 @@ export class LanguageServerClient {
     this.client.close()
   }
 
-  notifyWorkspaceEdit(changes: LSP.WorkspaceFoldersChangeEvent) {
+  notifyWorkspaceAdd(name: string, path: string) {
+    console.log('add workspace: ' + this.resolvePath(path))
     return this.notify('workspace/didChangeWorkspaceFolders', {
-      event: changes
+      event: {
+        added: [{
+          uri: this.resolvePath(path),
+          name
+        }],
+        removed: []
+      }
     })
   }
 
-  notifyDocOpen(uri: string, content: string) {
+  notifyWorkspaceRemove(name: string, path: string) {
+    console.log('remove workspace: ' + this.resolvePath(path))
+    return this.notify('workspace/didChangeWorkspaceFolders', {
+      event: {
+        added: [],
+        removed: [{
+          uri: this.resolvePath(path),
+          name
+        }]
+      }
+    })
+  }
+
+  notifyDocOpen(path: string, content: string) {
+    console.log('open file: ' + this.resolvePath(path))
     return this.notify('textDocument/didOpen', {
       textDocument: {
-        uri,
+        uri: this.resolvePath(path),
         languageId: '',
         text: content,
         version: this.documentVersion
@@ -87,32 +115,34 @@ export class LanguageServerClient {
     })
   }
 
-  notifyDocChange(uri: string, content: string) {
+  notifyDocChange(path: string, content: string) {
+    console.log('change file: ' + this.resolvePath(path))
     this.documentVersion++
     return this.notify('textDocument/didChange', {
-      textDocument: { uri, version: this.documentVersion },
+      textDocument: { uri: this.resolvePath(path), version: this.documentVersion },
       contentChanges: [{ text: content }]
     })
   }
 
-  notifyDocClose(uri: string) {
+  notifyDocClose(path: string) {
+    console.log('close file: ' + this.resolvePath(path))
     this.documentVersion = 0
     return this.notify('textDocument/didClose', {
-      textDocument: { uri }
+      textDocument: { uri: this.resolvePath(path) }
     })
   }
 
-  requestCompletion(uri: string, pos: LSP.Position, ctx: LSP.CompletionContext) {
+  requestCompletion(path: string, pos: LSP.Position, ctx: LSP.CompletionContext) {
     return this.request('textDocument/completion', {
       context: ctx,
-      textDocument: { uri },
+      textDocument: { uri: this.resolvePath(path) },
       position: pos
     })
   }
 
-  requestHover(uri: string, pos: LSP.Position) {
+  requestHover(path: string, pos: LSP.Position) {
     return this.request('textDocument/hover', {
-      textDocument: { uri },
+      textDocument: { uri: this.resolvePath(path) },
       position: pos
     })
   }

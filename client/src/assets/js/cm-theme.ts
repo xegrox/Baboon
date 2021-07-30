@@ -1,6 +1,6 @@
 import {EditorView} from "@codemirror/view"
 import { Extension } from '@codemirror/state'
-import {HighlightStyle, tags as t} from "@codemirror/highlight"
+import {HighlightStyle, tags as t, tags} from "@codemirror/highlight"
 
 const lineHeight = '1.5rem'
 const duration = '0.2s'
@@ -9,7 +9,9 @@ const duration = '0.2s'
 const background = '#1a1a1a',
   lightBackground = '#202020',
   selection = '#2a2a2a',
-  foreground = '#dadada'
+  foreground = '#eeeeee',
+  comment = '#aaaaaa',
+  keyword = '#bbbbbb'
 
 export const cmTheme = EditorView.theme({
   "&": {
@@ -85,7 +87,16 @@ export const cmTheme = EditorView.theme({
 }, {dark: true})
 
 export const cmHighlight = HighlightStyle.define([
-
+  { tag: [tags.comment],
+    color: comment },
+  { tag: [tags.keyword],
+    color: keyword },
+  { tag: [tags.propertyName],
+    fontWeight: "bold" },
+  { tag: [tags.link],
+    textDecoration: "underline" },
+  { tag: [tags.bool, tags.self],
+    fontStyle: "italic" }
 ])
 
 export const theme: Extension = [cmTheme, cmHighlight]

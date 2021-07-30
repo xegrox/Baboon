@@ -11,7 +11,7 @@
       <CodeViews
         :tabs="slotProps.project.editorPaneTabs.all"
         :activePath="slotProps.project.editorPaneTabs.active"
-        :lspServerUrl="slotProps.project.lspServerUrl"
+        :lspServerUrls="slotProps.project.lspServerUrls"
         class="flex-1"/>
     </div>
   </ProjectWrapper>

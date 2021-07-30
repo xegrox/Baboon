@@ -10,7 +10,7 @@ export class ProjectItem {
   name: string
   path: string
   editorPaneTabs = new TabsManager<EditorPaneTab>()
-  lspServerUrl = ''
+  lspServerUrls = new Set<string>()
 
   constructor(name: string, path: string) {
     this.name = name

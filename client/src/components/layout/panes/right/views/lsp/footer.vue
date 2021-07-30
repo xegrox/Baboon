@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-4">
     <div>
       <ErrorLabel :errorMsg="errorMsg"/>
-      <TextInput prefix="ws://" placeholder="Url" v-model="url" @update:modelValue="url = $event ?? ''" :disabled="loading" @input="errorMsg = ''" @enter="submit()"/>
+      <TextInput prefix="ws://" placeholder="Url" v-model="url" :disabled="loading" @input="errorMsg = ''" @enter="submit()"/>
     </div>
     <ProgressButton ref="submit" @click="addServer(url)" :loading="loading" :disabled="btnDisabled">Add</ProgressButton>
   </div>
@@ -14,7 +14,8 @@ import ErrorLabel from 'components/ui/ErrorLabel.vue'
 import TextInput from 'components/ui/TextInput.vue'
 import ProgressButton from 'components/ui/ProgressButton.vue'
 import { Client } from 'rpc-websockets'
-import { LanguageServerClient } from 'api/lsp'
+import { LSPEntry } from 'types/LSPEntry.class'
+import { LSPClient } from 'api/lsp'
 
 export default defineComponent({
   components: {
@@ -31,7 +32,7 @@ export default defineComponent({
   },
   computed: {
     btnDisabled(): boolean {
-      return this.url === '' || this.$accessor.lspservers.all.get(this.url) ? true: false
+      return this.url === '' || this.$accessor.lspclients.all.has(this.url)
     }
   },
   methods: {
@@ -50,12 +51,12 @@ export default defineComponent({
         })
 
         client.on('open', () => {
-          let lspClient = new LanguageServerClient(client)
+          let lspClient = new LSPClient(client)
           lspClient.initialize().then(() => {
-            this.$accessor.lspservers.all.set(url, lspClient)
+            this.$accessor.lspclients.all.set(url, new LSPEntry(lspClient))
             client.removeAllListeners('error')
             client.on('close', () => {
-              this.$accessor.lspservers.all.delete(url)
+              this.$accessor.lspclients.all.delete(url)
             })
           }).catch((e) => {
             let msg = (e as Error).message

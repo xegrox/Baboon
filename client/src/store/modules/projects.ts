@@ -1,4 +1,4 @@
-import { mutationTree } from 'typed-vuex'
+import { mutationTree, getterTree } from 'typed-vuex'
 import { ProjectItem } from 'types/ProjectItem.class'
 
 const state = {
@@ -25,8 +25,15 @@ const mutations = mutationTree(state, {
   }
 })
 
+const getters = getterTree(state, {
+  active(state) {
+    return state.all.get(state.activePath)
+  }
+})
+
 export default {
   namespaced: true,
   state,
-  mutations
+  mutations,
+  getters
 }

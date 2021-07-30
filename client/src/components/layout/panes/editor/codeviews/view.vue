@@ -16,8 +16,10 @@ import { autocompletion, CompletionContext, CompletionResult, Completion } from 
 import { hoverTooltip } from '@codemirror/tooltip'
 import { theme } from 'assets/js/cm-theme'
 import { languages } from '@codemirror/language-data'
-import { LanguageServerClient } from 'api/lsp'
+import { LSPEntry } from 'types/LSPEntry.class'
+import { LSPClient } from 'api/lsp'
 import * as LSP from 'vscode-languageserver-protocol'
+import p from 'path-browserify'
 
 export default defineComponent({
   props: {
@@ -25,7 +27,10 @@ export default defineComponent({
       type: String,
       required: true
     },
-    lspClient: Object as PropType<LanguageServerClient>
+    lspServerUrls: {
+      type: Object as PropType<Set<string>>,
+      required: true
+    }
   },
   data() {
     return {
@@ -37,22 +42,31 @@ export default defineComponent({
     }
   },
   computed: {
-    pathUri(): string {
-      return 'file://' + this.path
+    lspEntry(): LSPEntry | undefined {
+      for (let url of this.lspServerUrls) {
+        let entry = this.$accessor.lspclients.all.get(url)
+        if (!entry) continue
+        let match = entry.config.fileMatch
+        if (!match) return entry
+        let regex = new RegExp(match.pattern, match.flags)
+        if (regex.test(p.basename(this.path))) return entry
+      }
+      return undefined
     }
   },
   watch: {
-    lspClient: {
+    'lspEntry.client': {
       immediate: true,
-      handler(n?: LanguageServerClient, o?: LanguageServerClient) {
+      handler(n?: LSPClient, o?: LSPClient) {
         this.view.dispatch(setDiagnostics(this.view.state as EditorState, []))
-        n?.notifyDocOpen(this.pathUri, this.view.state.doc.toString())
-        n?.setDiagnosticsListener(this.pathUri, (diagnostics) => {
+        n?.notifyDocOpen(this.path, this.view.state.doc.toString())
+        n?.setDiagnosticsListener(this.path, (diagnostics) => {
+          console.log('diag')
           let transaction = setDiagnostics(this.view.state as EditorState, this.processDiagnostics(diagnostics))
           this.view.dispatch(transaction)
         })
-        o?.notifyDocClose(this.pathUri)
-        o?.removeDiagnosticsListener(this.pathUri)
+        o?.notifyDocClose(this.path)
+        o?.removeDiagnosticsListener(this.path)
       }
     }
   },
@@ -157,8 +171,8 @@ export default defineComponent({
     }
   },
   unmounted() {
-    this.lspClient?.notifyDocClose(this.pathUri)
-    this.lspClient?.removeDiagnosticsListener(this.pathUri)
+    this.lspEntry?.client.notifyDocClose(this.path)
+    this.lspEntry?.client.removeDiagnosticsListener(this.path)
   },
   mounted() {
     this.$sftp.read(this.path).then(async (content) => {
@@ -173,7 +187,7 @@ export default defineComponent({
                 clearTimeout(this.dbModTimerId)
                 this.dbModTimerId = setTimeout(() => this.$emit('modified', !this.compareDocEq(v.state.doc)), 500)
                 clearTimeout(this.dbDSTimerId)
-                this.dbDSTimerId = setTimeout(() => this.lspClient?.notifyDocChange('file://' + this.path, v.state.doc.toString()), 500)
+                this.dbDSTimerId = setTimeout(() => this.lspEntry?.client.notifyDocChange(this.path, v.state.doc.toString()), 500)
               }
             }),
             lineNumbers(),
@@ -183,11 +197,12 @@ export default defineComponent({
             closeBrackets(),
             indentOnInput(),
             autocompletion({
-              override: this.lspClient ? [async (ctx) => {
+              override: this.lspEntry ? [async (ctx) => {
+                let client = this.lspEntry?.client
                 // There are two types of autocomplete triggers:
                 // TriggerCharacter: when a specific character is entered (e.g. '.')
                 // Invoked: when typing an identifier or manually invoked (Ctrl + Space)
-                let triggerChars = this.lspClient?.serverCapabilities?.completionProvider?.triggerCharacters
+                let triggerChars = client?.serverCapabilities?.completionProvider?.triggerCharacters
 
                 // Determine whether there was a trigger character before the cursor
                 // If there is, set trigKind to TriggerCharacter
@@ -201,9 +216,9 @@ export default defineComponent({
                   trigKind = LSP.CompletionTriggerKind.Invoked
                 }
 
-                await this.lspClient?.notifyDocChange('file://' + this.path, ctx.state.doc.toString())
-                let completion = await this.lspClient?.requestCompletion(
-                  'file://' + this.path,
+                await client?.notifyDocChange(this.path, ctx.state.doc.toString())
+                let completion = await client?.requestCompletion(
+                  this.path,
                   this.offsetToPos(ctx.state.doc, ctx.pos),
                   {
                     triggerKind: trigKind,
@@ -216,7 +231,7 @@ export default defineComponent({
               }] : undefined
             }),
             hoverTooltip(async (view, pos) => {
-              let hover = await this.lspClient?.requestHover('file://' + this.path, this.offsetToPos(view.state.doc, pos))
+              let hover = await this.lspEntry?.client.requestHover(this.path, this.offsetToPos(view.state.doc, pos))
               if (!hover) return null
               let parsed = this.parseMarkup(hover.contents)
               return {
@@ -250,7 +265,7 @@ export default defineComponent({
         })
       })
       this.initialDoc = this.view.state.doc
-      this.lspClient?.notifyDocChange(this.pathUri, content)
+      this.lspEntry?.client.notifyDocChange(this.path, content)
     }).catch(() => {})
   }
 })
