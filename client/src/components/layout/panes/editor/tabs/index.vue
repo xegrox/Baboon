@@ -1,12 +1,16 @@
 <template>
   <div class="flex bg-white bg-opacity-10">
-    <TabItem v-for="[key, tab] in tabs" :key="key" :name="nameFromPath(tab.path)" :isActive="activePath === tab.path"  :isModified="tab.modified" :isSaving="tab.saving" @click="$emit('update:activePath', tab.path)" @close="$emit('closeTab', tab.path)"/>
+    <TabItem
+      v-for="[key, tab] in tabs" :key="key"
+      :name="tab.relPath" :isActive="activeRelPath === tab.relPath"
+      :isModified="tab.modified" :isSaving="tab.saving"
+      @click="$emit('update:activeRelPath', tab.relPath)"
+      @close="$emit('closeTab', tab.relPath)"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import p from 'path-browserify'
 import { EditorPaneTab } from 'types/ProjectItem.class'
 import TabItem from 'components/ui/TabItem.vue'
 
@@ -23,14 +27,9 @@ export default defineComponent({
       type: Object as PropType<ReadonlyMap<string, EditorPaneTab>>,
       required: true
     },
-    activePath: {
+    activeRelPath: {
       type: String,
       required: true
-    }
-  },
-  methods: {
-    nameFromPath(path: string): string {
-      return p.relative(this.rootPath, path)
     }
   }
 })

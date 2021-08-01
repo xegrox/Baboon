@@ -1,6 +1,6 @@
 <template>
   <div>
-    <FilePicker ref="filepicker" rootName="/" rootPath="/" @done="onSelect($event)" pickFolder/>
+    <FilePicker ref="filepicker" rootPath="/" @done="onSelect($event)" pickFolder/>
     <div class="h-full bg-gray-800 flex flex-col items-center pt-7 gap-5">
       <Item @click="openFilePicker()">
         <PlusIcon class="w-5 h-5 text-gray-400"/>

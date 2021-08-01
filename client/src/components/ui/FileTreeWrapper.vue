@@ -1,6 +1,6 @@
 <template>
   <div>
-    <FileTree :item="rootBranch" :activePath="activeNode.path" :allowFile="allowFile" :allowFolder="allowFolder" @rightClickNode="onRightClickNode" @clickNode="onClickNode"/>
+    <FileTree :rootPath="rootPath" :node="rootBranch" :activeNode="activeNode" :allowFile="allowFile" :allowFolder="allowFolder" @rightClickNode="onRightClickNode" @clickNode="onClickNode"/>
     <ContextMenu ref="ctxmenu">
       <ContextMenuItem text="New file" shortcut="A" @click="openInputPathDialog(refNewFilePrompt)"/>
       <ContextMenuItem text="New folder" shortcut="Shift+A" @click="openInputPathDialog(refNewFolderPrompt)"/>
@@ -8,7 +8,7 @@
     </ContextMenu>
     <InputPrompt ref="newFilePrompt" placeholder="Path to new file" @enter="createNewFile"/>
     <InputPrompt ref="newFolderPrompt" placeholder="Path to new folder" @enter="createNewFolder"/>
-    <ActionDialog ref="deletePathPrompt" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(activeNode.path)"/>
+    <ActionDialog ref="deletePathPrompt" message="Are you sure you want to permanently delete the selected item?" actionText="Delete" @positive="deletePath(activeNode.relPath)"/>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default defineComponent({
     ActionDialog
   },
   props: {
-    path: {
+    rootPath: {
       type: String,
       required: true
     },
@@ -47,7 +47,13 @@ export default defineComponent({
     }
   },
   data() {
-    var rootBranch: TreeBranch = new TreeBranch(this.path, undefined)
+    let basename = p.basename(this.rootPath)
+    if (basename === '') basename = '/'
+    let rootBranch = new TreeBranch(
+      basename,
+      p.normalize(this.rootPath) === '/' ? '/' : '',
+      undefined
+    )
     return {
       rootBranch: rootBranch,
       activeNode: rootBranch as TreeNode
@@ -59,9 +65,6 @@ export default defineComponent({
     refDeletePathPrompt(): any { return this.$refs.deletePathPrompt as any }
   },
   methods: {
-    getRootBranch() { return this.rootBranch },
-    getActiveNode() { return this.activeNode },
-
     onRightClickNode(node: TreeNode, event: MouseEvent) {
       this.activeNode = node
       var menu = this.$refs.ctxmenu as any
@@ -72,33 +75,41 @@ export default defineComponent({
 
     onClickNode(node: TreeNode, event: MouseEvent) {
       this.activeNode = node
-      this.$emit('activePathUpdate', node.path)
+      this.$emit('activeRelPathUpdate', node.relPath)
       this.$emit('clickNode', node, event)
     },
 
     getNodeBranch(node: TreeNode): TreeBranch {
+      // Returns the node's parent or the node itself if it is a branch
       return (node instanceof TreeLeaf) ? node.parent : node as TreeBranch
     },
 
     openInputPathDialog(ref: any) {
-      ref.setValue(p.normalize(this.getNodeBranch(this.activeNode).path + p.sep))
+      let relPath = this.getNodeBranch(this.activeNode).relPath
+      ref.setValue(relPath !== '' ? p.normalize(relPath + p.sep) : relPath)
       ref.open()
     },
 
-    createNewFile(path: string) {
+    createNewFile(relPath: string) {
+      let fullPath = p.join(this.rootPath, relPath)
       this.refNewFilePrompt.setDisabled(true)
-      this.$sftp.exists(path).then((exists) => {
+      this.$sftp.exists(fullPath).then((exists) => {
         if (exists) {
+          // Display error is path exists
           this.refNewFilePrompt.setDisabled(false)
           this.refNewFilePrompt.setError('Path with same name already exists')
         } else {
-          this.$sftp.write(path, '').then(() => {
+          // Write new empty file
+          this.$sftp.write(fullPath, '').then(() => {
             var parentNode = this.getNodeBranch(this.activeNode)
+            // Insert new leaf node if branch is expanded
             if (parentNode.expanded) {
-              var leaf = new TreeLeaf(path, parentNode)
-              var insertIndex = parentNode.children.findIndex((n) =>
+              var leaf = new TreeLeaf(p.basename(relPath), relPath, parentNode)
+              var insertIndex = parentNode.children.findIndex((n) => {
+                // Get index of the leaf node positioned after it
                 n instanceof TreeLeaf && leaf.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
-              )
+              })
+              // If there's none, insert at the end
               if (insertIndex === -1) insertIndex = parentNode.children.length
               parentNode.children.splice(insertIndex, 0, leaf)
             }
@@ -108,21 +119,28 @@ export default defineComponent({
       }).catch(() => {}).finally(() => this.refNewFilePrompt.setDisabled(false))
     },
 
-    createNewFolder(path: string) {
+    createNewFolder(relPath: string) {
+      let fullPath = p.join(this.rootPath, relPath)
       this.refNewFolderPrompt.setDisabled(true)
-      this.$sftp.exists(path).then((exists) => {
+      this.$sftp.exists(fullPath).then((exists) => {
         if (exists) {
+          // Display error if path exists
           this.refNewFolderPrompt.setDisabled(false)
           this.refNewFolderPrompt.setError('Path with same name already exists')
         } else {
-          this.$sftp.mkdir(path).then(() => {
+          // Creat new dir
+          this.$sftp.mkdir(fullPath).then(() => {
             var parentNode = this.getNodeBranch(this.activeNode)
+            // Insert new branch node if branch is expanded
             if (parentNode.expanded) {
-              var branch = new TreeBranch(path, parentNode)
-              var insertIndex = parentNode.children.findIndex((n) =>
-                n instanceof TreeLeaf || branch.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
-              )
-              if (insertIndex === -1) insertIndex = 0
+              var branch = new TreeBranch(p.basename(relPath), relPath, parentNode)
+              var insertIndex = parentNode.children.findIndex((n) => {
+                // Get index of the node positioned after it
+                n instanceof TreeLeaf // Branches are positioned before leafs
+                || branch.name.toLowerCase().localeCompare(n.name.toLowerCase()) === -1
+              })
+              // If there's none, insert at the end
+              if (insertIndex === -1) insertIndex = parentNode.children.length
               parentNode.children.splice(insertIndex, 0, branch)
             }
             this.refNewFolderPrompt.close()
@@ -131,9 +149,10 @@ export default defineComponent({
       }).catch(() => {})
     },
 
-    deletePath(path: string) {
+    deletePath(relPath: string) {
+      let fullPath = p.join(this.rootPath, relPath)
       this.refDeletePathPrompt.setLoading(true)
-      this.$sftp.exists(path).then((exists) => {
+      this.$sftp.exists(fullPath).then((exists) => {
         if (!exists) {
           this.refDeletePathPrompt.setLoading(false)
           this.refDeletePathPrompt.close()
@@ -154,9 +173,10 @@ export default defineComponent({
               // TODO: support link delete
               return
           }
-          cmd(path).then(() => {
+          cmd(fullPath).then(() => {
+            // Remove deleted file's node
             var parentChildren = this.activeNode.parent?.children
-            parentChildren?.splice(parentChildren.findIndex((n) => n.path === path), 1)
+            parentChildren?.splice(parentChildren.indexOf(this.activeNode), 1)
           }).catch(() => {}).finally(() => {
             this.refDeletePathPrompt.setLoading(false)
             this.refDeletePathPrompt.close()

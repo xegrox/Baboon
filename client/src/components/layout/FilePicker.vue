@@ -1,13 +1,18 @@
 <template>
   <Modal ref="modal" width="50%" height="70%" dismissible>
     <div class="w-full h-full flex flex-col gap-5">
-      <TextInput placeholder="Path" v-model="path"/>
-      <FileTreeWrapper class="w-full h-full overflow-auto" :path="rootPath" :name="rootName" @activePathUpdate="path = $event" :allowFolder="pickFolder" :allowFile="pickFile"/>
+      <TextInput placeholder="Path" v-model="activePath"/>
+      <FileTreeWrapper
+        class="w-full h-full overflow-auto"
+        :rootPath="rootPath"
+        @activeRelPathUpdate="updateActivePath($event)"
+        :allowFolder="pickFolder"
+        :allowFile="pickFile"/>
       <div class="flex flex-none gap-4 items-center justify-end">
         <TextButton @click="close()">
           <p class="pr-4 pl-4">Cancel</p>
         </TextButton>
-        <ProgressButton :loading="loading" :disabled="path === ''" @click="checkPath" indeterminate>
+        <ProgressButton :loading="loading" :disabled="activePath === ''" @click="checkPath" indeterminate>
           <p class="pr-4 pl-4">Open</p>
         </ProgressButton>
       </div>
@@ -39,10 +44,6 @@ export default defineComponent({
       type: String,
       required: true
     },
-    rootName: {
-      type: String,
-      required: true
-    },
     pickFolder: {
       type: Boolean,
       default: false
@@ -54,11 +55,14 @@ export default defineComponent({
   },
   data() {
     return {
-      path: this.rootPath,
+      activePath: this.rootPath,
       loading: false
     }
   },
   methods: {
+    updateActivePath(relPath: string) {
+      this.activePath = p.join(this.rootPath, relPath)
+    },
     open() { (this.$refs.modal as any).open() },
     close() { (this.$refs.modal as any).close() },
     alertError(title: string, content?: string) {
@@ -70,8 +74,7 @@ export default defineComponent({
     },
     checkPath() {
       this.loading = true
-      var path = p.normalize(this.path)
-      this.$sftp.exists(path).then((exists) => {
+      this.$sftp.exists(this.activePath).then((exists) => {
         if (!exists) {
           this.alertError('Path does not exists')
           return
@@ -84,7 +87,7 @@ export default defineComponent({
             return
           }
           (this.$refs.modal as any).close()
-          this.$emit('done', path)
+          this.$emit('done', this.activePath)
         }
       }).catch(() => {}).finally(() => this.loading = false)
     }

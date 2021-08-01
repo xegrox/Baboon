@@ -14,7 +14,6 @@ import ErrorLabel from 'components/ui/ErrorLabel.vue'
 import TextInput from 'components/ui/TextInput.vue'
 import ProgressButton from 'components/ui/ProgressButton.vue'
 import { Client } from 'rpc-websockets'
-import { LSPEntry } from 'types/LSPEntry.class'
 import { LSPClient } from 'api/lsp'
 
 export default defineComponent({
@@ -53,7 +52,7 @@ export default defineComponent({
         client.on('open', () => {
           let lspClient = new LSPClient(client)
           lspClient.initialize().then(() => {
-            this.$accessor.lspclients.all.set(url, new LSPEntry(lspClient))
+            this.$accessor.lspclients.all.set(url, lspClient)
             client.removeAllListeners('error')
             client.on('close', () => {
               this.$accessor.lspclients.all.delete(url)
@@ -79,6 +78,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="css" scoped>
-</style>

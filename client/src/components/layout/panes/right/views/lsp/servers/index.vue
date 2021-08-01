@@ -2,10 +2,10 @@
   <div class="overflow-auto relative">
     <transition-group name="list">
       <div
-        v-for="[key, entry] in lspClients"
+        v-for="[key, client] in lspClients"
         :key="key"
         class="py-2 transition">
-        <Item :url="key" :lspEntry="entry"/>
+        <Item :url="key" :lspClient="client"/>
       </div>
     </transition-group>
   </div>
@@ -14,15 +14,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import Item from './item.vue'
-import { LSPEntry } from 'types/LSPEntry.class'
+import { LSPClient } from 'api/lsp'
 
 export default defineComponent({
   components: {
     Item
   },
   computed: {
-    lspClients(): Map<string, LSPEntry> {
-      (new RegExp('test'))
+    lspClients(): Map<string, LSPClient> {
       return this.$accessor.lspclients.all
     }
   }

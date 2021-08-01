@@ -14,7 +14,7 @@
         <p class="text-gray-400 leading-tight">
           Regex used to test the filename of an open file.
           If a match is found, this lsp is used for that file.
-          If multiple lsps matches the same file, the first lsp in the list will be used.</p>
+          If multiple lsps matches the same file, the first lsp that was turned on in the list will be used.</p>
         <div class="flex gap-2 mt-2">
           <TextInput class="w-2/3" placeholder="Pattern" v-model="config.fileMatch.pattern"/>
           <TextInput class="w-1/3" placeholder="Flags" v-model="config.fileMatch.flags"/>
@@ -24,13 +24,13 @@
         </ExpandTransition>
       </div>
       <div class="flex gap-4">
-        <OutlinedButton class="mr-auto" @click="remove()">
+        <OutlinedButton class="mr-auto" @click="removeLsp()">
           <p class="pr-4 pl-4">Remove</p>
         </OutlinedButton>
         <TextButton @click="close()">
           <p class="pr-4 pl-4">Cancel</p>
         </TextButton>
-        <OutlinedButton @click="save()">
+        <OutlinedButton @click="saveConfig()">
           <p class="pr-4 pl-4">Save</p>
         </OutlinedButton>
       </div>
@@ -42,11 +42,11 @@
 import { defineComponent, PropType } from 'vue'
 import Modal from 'components/ui/Modal.vue'
 import TextInput from 'components/ui/TextInput.vue'
-import { LSPEntry } from 'types/LSPEntry.class'
 import TextButton from 'components/ui/TextButton.vue'
 import OutlinedButton from 'components/ui/OutlinedButton.vue'
 import ErrorLabel from 'components/ui/ErrorLabel.vue'
 import ExpandTransition from 'components/ui/transitions/Expand.vue'
+import { LSPClient, LSPConfig } from 'api/lsp'
 
 export default defineComponent({
   components: {
@@ -62,14 +62,14 @@ export default defineComponent({
       type: String,
       required: true
     },
-    lspEntry: {
-      type: Object as PropType<LSPEntry>,
+    lspClient: {
+      type: Object as PropType<LSPClient>,
       required: true
     },
   },
   data() {
     return {
-      config: JSON.parse(JSON.stringify({ ...this.lspEntry.config })),
+      config: {} as LSPConfig,
       loading: false,
       errors: {
         fileMatchRegex: ''
@@ -77,27 +77,42 @@ export default defineComponent({
     }
   },
   methods: {
+    cloneObj(obj: Object): LSPConfig {
+      return JSON.parse(JSON.stringify(obj))
+    },
     open() {
       (this.$refs.modal as any).open()
-      this.config = JSON.parse(JSON.stringify({ ...this.lspEntry.config }))
-      this.errors.fileMatchRegex = ''
+      this.config = this.cloneObj(this.lspClient.config)
+      let errors = this.errors
+      Object.keys(errors).forEach((k) => { errors[k as keyof typeof errors] = '' })
     },
     close() { (this.$refs.modal as any).close() },
-    save() {
+    saveConfig() {
       try {
         new RegExp(this.config.fileMatch.pattern, this.config.fileMatch.flags)
       } catch(e) {
         this.errors.fileMatchRegex = (e as Error).message
         return
       }
-      this.lspEntry.setConfig(this.config)
+      this.lspClient.setConfig(this.config)
+      // Force codeviews to reopen their document
+      this.$accessor.projects.all.forEach((p) => {
+        let workspace = p.lspWorkspaces.get(this.url)
+        if (workspace) {
+          p.lspWorkspaces.delete(this.url)
+          this.$nextTick(() => {
+            p.lspWorkspaces.set(this.url, workspace!)
+          })
+        }
+      })
       this.close()
     },
-    remove() {
-      this.$accessor.projects.all.forEach((project) => {
-        project.lspServerUrls.delete(this.url)
-      })
-      this.lspEntry.client.close()
+    removeLsp() {
+      // Remove active lsp urls from all projects
+      this.$accessor.projects.all.forEach((p) => p.lspWorkspaces.delete(this.url) )
+      // Close all workspaces and docs before closing connection
+      this.lspClient.workspaces.forEach((w) => this.lspClient.removeWorkspace(w.path) )
+      this.lspClient.client.close()
     }
   }
 })

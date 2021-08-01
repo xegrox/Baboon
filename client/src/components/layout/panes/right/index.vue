@@ -8,10 +8,9 @@
           @closeTab="tabs.remove($event)"
         />
         <div class="relative flex-1 w-full">
-          <test class="h-full"/>
-          <!-- <div v-for="[key, item] in views" :key="key" class="absolute w-full h-full">
-            <component v-show="key === tabs.active" :is="item"/>
-          </div> -->
+          <div v-for="[key, item] in views" :key="key" class="absolute w-full h-full">
+            <component v-show="key === tabs.active" :is="item" class="h-full"/>
+          </div>
         </div>
       </div>
     </transition>
@@ -22,25 +21,23 @@ import { defineComponent, defineAsyncComponent, Component } from 'vue'
 import FadeTransition from 'components/ui/transitions/Fade.vue'
 import Tabs from './tabs/index.vue'
 import { TabsManager } from 'types/TabsManager.class'
-import test from './views/lsp/index.vue'
 
 export default defineComponent({
   components: {
     FadeTransition,
-    Tabs,
-    test
+    Tabs
   },
   computed: {
     tabs(): TabsManager {
       return this.$accessor.panes.right
     },
-    // views(): Map<string, Component> {
-    //   let views = new Map<string, Component>()
-    //   this.$accessor.panes.right.all.forEach((tab, key) => {
-    //     views.set(key, defineAsyncComponent(() => import(`./views/${tab.viewTag}/index.vue`)))
-    //   })
-    //   return views
-    // }
+    views(): Map<string, Component> {
+      let views = new Map<string, Component>()
+      this.$accessor.panes.right.all.forEach((tab, key) => {
+        views.set(key, defineAsyncComponent(() => import(`./views/${tab.viewTag}/index.vue`)))
+      })
+      return views
+    }
   }
 })
 </script>

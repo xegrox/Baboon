@@ -1,7 +1,9 @@
 import { TabsManager } from './TabsManager.class'
+import { LSPWorkspace } from 'api/lsp'
 
 export interface EditorPaneTab {
-  path: string,
+  relPath: string,
+  savedContents: string,
   modified: boolean,
   saving: boolean
 }
@@ -10,7 +12,8 @@ export class ProjectItem {
   name: string
   path: string
   editorPaneTabs = new TabsManager<EditorPaneTab>()
-  lspServerUrls = new Set<string>()
+  // Key: url of lsp server
+  lspWorkspaces = new Map<string, LSPWorkspace>()
 
   constructor(name: string, path: string) {
     this.name = name

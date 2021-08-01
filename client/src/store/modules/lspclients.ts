@@ -1,7 +1,7 @@
-import { LSPEntry } from 'types/LSPEntry.class'
+import { LSPClient } from 'api/lsp'
 
 const state = {
-  all: new Map<string, LSPEntry>()
+  all: new Map<string, LSPClient>()
 }
 
 export default {

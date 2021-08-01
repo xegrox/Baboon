@@ -2,17 +2,19 @@
   <ProjectWrapper v-slot="slotProps">
     <div class="flex flex-col">
       <Tabs
+        class="flex-none h-12"
         :rootPath="slotProps.project.path"
         :tabs="slotProps.project.editorPaneTabs.all"
-        :activePath="slotProps.project.editorPaneTabs.active"
-        @update:activePath="slotProps.project.editorPaneTabs.active = $event"
-        @closeTab="slotProps.project.editorPaneTabs.remove($event)" class="flex-none h-12"
+        v-model:activeRelPath="slotProps.project.editorPaneTabs.active"
+        @closeTab="slotProps.project.editorPaneTabs.remove($event)"
       />
       <CodeViews
+        class="flex-1"
+        :rootPath="slotProps.project.path"
         :tabs="slotProps.project.editorPaneTabs.all"
-        :activePath="slotProps.project.editorPaneTabs.active"
-        :lspServerUrls="slotProps.project.lspServerUrls"
-        class="flex-1"/>
+        :activeRelPath="slotProps.project.editorPaneTabs.active"
+        :lspWorkspaces="slotProps.project.lspWorkspaces"
+      />
     </div>
   </ProjectWrapper>
 </template>

@@ -13,17 +13,17 @@
         </div>
       </transition-group>
     </div>
-    <Settings ref="settings" :url="url" :lspEntry="lspEntry"/>
+    <Settings ref="settings" :url="url" :lspClient="lspClient"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { ProjectItem } from 'types/ProjectItem.class'
-import { LSPEntry } from 'types/LSPEntry.class'
 import ToggleSwitch from 'components/ui/ToggleSwitch.vue'
 import { SettingsIcon } from '@zhuowenli/vue-feather-icons'
 import Settings from './settings.vue'
+import { LSPClient } from 'api/lsp'
 
 export default defineComponent({
   components: {
@@ -36,8 +36,8 @@ export default defineComponent({
       type: String,
       required: true
     },
-    lspEntry: {
-      type: Object as PropType<LSPEntry>,
+    lspClient: {
+      type: Object as PropType<LSPClient>,
       required: true
     }
   },
@@ -47,17 +47,15 @@ export default defineComponent({
     }
   },
   methods: {
-    activate() {
-      let lspEntry = this.$accessor.lspclients.all.get(this.url)
-      if (!this.activeProject || !lspEntry) return
-      this.activeProject.lspServerUrls.add(this.url)
-      lspEntry.client.notifyWorkspaceAdd(this.activeProject.name, this.activeProject.path)
+    async activate() {
+      if (!this.activeProject) return
+      let workspace = await this.lspClient.addWorkspace(this.activeProject.name, this.activeProject.path)
+      this.activeProject.lspWorkspaces.set(this.url, workspace)
     },
-    deactivate() {
-      let lspEntry = this.$accessor.lspclients.all.get(this.url)
-      if (!this.activeProject || !lspEntry) return
-      this.activeProject.lspServerUrls.delete(this.url)
-      lspEntry.client.notifyWorkspaceRemove(this.activeProject.name, this.activeProject.path)
+    async deactivate() {
+      if (!this.activeProject) return
+      await this.lspClient.removeWorkspace(this.activeProject.path)
+      this.activeProject.lspWorkspaces.delete(this.url)
     },
     openSettings() {
       (this.$refs.settings as any).open()
@@ -74,7 +72,7 @@ export default defineComponent({
       return this.$accessor.projects.active
     },
     isActive(): boolean {
-      return this.activeProject ? this.activeProject.lspServerUrls.has(this.url) : false
+      return this.activeProject ? this.activeProject.lspWorkspaces.has(this.url) : false
     }
   }
 })
