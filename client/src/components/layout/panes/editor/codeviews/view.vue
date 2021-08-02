@@ -18,7 +18,6 @@ import { theme } from 'assets/js/cm-theme'
 import { languages } from '@codemirror/language-data'
 import { LSPWorkspace } from 'api/lsp'
 import * as LSP from 'vscode-languageserver-protocol'
-import p from 'path-browserify'
 
 export default defineComponent({
   props: {
@@ -263,7 +262,7 @@ export default defineComponent({
           theme
         ].concat(language ? language : [])
       })
-    })
+    }) as any
   }
 })
 </script>

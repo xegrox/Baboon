@@ -9,5 +9,10 @@ export default defineConfig({
     proxy: {
       '^/sftp_client$': 'http://localhost:8000'
     }
+  },
+  resolve: {
+    alias: {
+      'demo_1.mp4': './public/demo_1.mp4'
+    }
   }
 })
