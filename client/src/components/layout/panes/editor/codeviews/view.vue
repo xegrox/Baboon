@@ -254,7 +254,7 @@ export default defineComponent({
             {
               key: 'c-s',
               run: (v) => {
-                clearTimeout(this.dbModTimerId)
+                clearTimeout(this.dbSvTimerId)
                 this.dbSvTimerId = setTimeout(() => this.$emit('save', v.state.doc.toString()), 500)
                 return true
               }
