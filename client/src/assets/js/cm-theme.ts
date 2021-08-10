@@ -1,6 +1,6 @@
 import {EditorView} from "@codemirror/view"
 import { Extension } from '@codemirror/state'
-import {HighlightStyle, tags as t, tags} from "@codemirror/highlight"
+import {HighlightStyle, tags as t } from "@codemirror/highlight"
 
 const lineHeight = '1.5rem'
 const duration = '0.2s'
@@ -43,7 +43,7 @@ export const cmTheme = EditorView.theme({
   },
   ".cm-gutters": {
     backgroundColor: background,
-    color: '#272b2b',
+    color: '#333838',
     border: "none",
   },
 
@@ -87,15 +87,15 @@ export const cmTheme = EditorView.theme({
 }, {dark: true})
 
 export const cmHighlight = HighlightStyle.define([
-  { tag: [tags.comment],
+  { tag: [t.comment],
     color: comment },
-  { tag: [tags.keyword],
+  { tag: [t.keyword],
     color: keyword },
-  { tag: [tags.propertyName],
+  { tag: [t.propertyName],
     fontWeight: "bold" },
-  { tag: [tags.link],
+  { tag: [t.link],
     textDecoration: "underline" },
-  { tag: [tags.bool, tags.self],
+  { tag: [t.bool, t.self],
     fontStyle: "italic" }
 ])
 

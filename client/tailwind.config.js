@@ -3,6 +3,7 @@ const plugin = require('tailwindcss/plugin')
 
 module.exports = {
   plugins: [
+    require('tailwind-scrollbar-hide'),
     plugin(function({ addVariant }) {
       addVariant('important', ({ container }) => {
         container.walkRules(rule => {

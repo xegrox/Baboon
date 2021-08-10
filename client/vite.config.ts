@@ -12,7 +12,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'demo_1.mp4': './public/demo_1.mp4'
+      'demo_1.mp4': './public/demo_1.mp4',
+      'demo_2.mp4': './public/demo_2.mp4'
     }
   }
 })

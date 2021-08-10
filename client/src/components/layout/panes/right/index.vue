@@ -9,7 +9,9 @@
         />
         <div class="relative flex-1 w-full">
           <div v-for="[key, item] in views" :key="key" class="absolute w-full h-full">
-            <component v-show="key === tabs.active" :is="item" class="h-full"/>
+            <FadeTransition>
+              <component v-show="key === tabs.active" :is="item" class="h-full"/>
+            </FadeTransition>
           </div>
         </div>
       </div>
